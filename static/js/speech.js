@@ -616,8 +616,13 @@ class SpeechManager {
                 audio.play();
                 
                 this.showNotification('Playing text as speech...', 'info');
-            } else {
-                this.showNotification(result.error || 'Text-to-speech failed', 'error');
+            }else {
+                const errorMsg = result.error || 'Text-to-speech failed';
+            if (errorMsg.includes('429') || errorMsg.includes('Unknown') || errorMsg.includes('Too Many Requests')) {
+                this.showNotification('TTS service is busy. You are being rate limited.', 'warning');
+            }else {
+                this.showNotification(errorMsg, 'error');
+            }
             }
         } catch (error) {
             console.error('Failed to convert text to speech:', error);
