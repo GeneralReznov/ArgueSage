@@ -1,0 +1,418 @@
+{% extends "base.html" %}
+
+{% block title %}Progress Tracking - Debate Sage{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+.stats-card {
+    transition: transform 0.2s;
+}
+.stats-card:hover {
+    transform: translateY(-2px);
+}
+.achievement-item {
+    transition: all 0.3s ease;
+}
+.achievement-item:hover {
+    background-color: var(--bs-primary-bg-subtle);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>
+                <i data-feather="trending-up" class="me-2"></i>
+                Your Progress
+            </h2>
+            <p class="text-muted">Track your debate journey and see how you're improving over time.</p>
+        </div>
+    </div>
+    
+    <!-- Stats Overview -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-3 col-md-6">
+            <div class="card stats-card bg-primary text-white">
+                <div class="card-body text-center">
+                    <i data-feather="star" class="mb-2" style="width: 48px; height: 48px;"></i>
+                    <h3>{{ analytics.total_points }}</h3>
+                    <p class="mb-0">Total Points</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card stats-card bg-success text-white">
+                <div class="card-body text-center">
+                    <i data-feather="users" class="mb-2" style="width: 48px; height: 48px;"></i>
+                    <h3>{{ analytics.total_debates }}</h3>
+                    <p class="mb-0">Debates Completed</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card stats-card bg-info text-white">
+                <div class="card-body text-center">
+                    <i data-feather="book-open" class="mb-2" style="width: 48px; height: 48px;"></i>
+                    <h3>{{ analytics.completed_lessons }}</h3>
+                    <p class="mb-0">Lessons Completed</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card stats-card bg-warning text-white">
+                <div class="card-body text-center">
+                    <i data-feather="award" class="mb-2" style="width: 48px; height: 48px;"></i>
+                    <h3>{{ analytics.achievements_count }}</h3>
+                    <p class="mb-0">Achievements</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-lg-8">
+            <!-- Performance Chart -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i data-feather="bar-chart" class="me-2"></i>
+                        Performance Trends
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="performanceChart" height="100"></canvas>
+                </div>
+            </div>
+            
+            <!-- Recent Debate History -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i data-feather="clock" class="me-2"></i>
+                        Recent Debate History
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if analytics.recent_performance %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Motion</th>
+                                    <th>Score</th>
+                                    <th>Points Earned</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for debate in analytics.recent_performance %}
+                                <tr>
+                                    <td>{{ debate.date[:10] }}</td>
+                                    <td class="text-truncate" style="max-width: 300px;">
+                                        {{ debate.motion }}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <span class="me-2">{{ debate.result.overall_score }}/100</span>
+                                            <div class="progress" style="width: 60px;">
+                                                <div class="progress-bar 
+                                                     {% if debate.result.overall_score >= 80 %}bg-success
+                                                     {% elif debate.result.overall_score >= 60 %}bg-warning
+                                                     {% else %}bg-danger{% endif %}" 
+                                                     style="width: {{ debate.result.overall_score }}%"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">+{{ debate.points_earned }}</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i data-feather="calendar" class="text-muted mb-3" style="width: 48px; height: 48px;"></i>
+                        <h6 class="text-muted">No debate history yet</h6>
+                        <p class="text-muted">Complete your first debate to see your progress here.</p>
+                        <a href="{{ url_for('debate') }}" class="btn btn-primary">
+                            <i data-feather="play" class="me-2"></i>
+                            Start First Debate
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Level Progress -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i data-feather="target" class="me-2"></i>
+                        Level Progress
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h6>Current Level: <span class="badge bg-primary">{{ analytics.level_progress.current_level.title() }}</span></h6>
+                            <div class="progress mb-2" style="height: 20px;">
+                                <div class="progress-bar bg-success" 
+                                     style="width: {{ analytics.level_progress.progress_percentage }}%">
+                                     {{ analytics.level_progress.progress_percentage }}%
+                                </div>
+                            </div>
+                            <small class="text-muted">
+                                {{ analytics.level_progress.points_in_level }} points in current level
+                                {% if analytics.level_progress.points_to_next > 0 %}
+                                • {{ analytics.level_progress.points_to_next }} points to next level
+                                {% endif %}
+                            </small>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            {% if analytics.level_progress.progress_percentage >= 100 %}
+                            <button class="btn btn-success" onclick="levelUp()">
+                                <i data-feather="arrow-up" class="me-2"></i>
+                                Level Up!
+                            </button>
+                            {% else %}
+                            <div class="text-muted">
+                                <i data-feather="trending-up" style="width: 32px; height: 32px;"></i>
+                                <br>Keep going!
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column -->
+        <div class="col-lg-4">
+            <!-- Current Stats Summary -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i data-feather="pie-chart" class="me-2"></i>
+                        Performance Summary
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h4 class="text-primary">{{ analytics.average_score }}</h4>
+                            <small class="text-muted">Avg Score</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-success">{{ analytics.current_level.title() }}</h4>
+                            <small class="text-muted">Level</small>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <!-- Skill Breakdown -->
+                    <h6 class="mb-3">Skill Areas</h6>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <small>Argument Construction</small>
+                            <small>75%</small>
+                        </div>
+                        <div class="progress progress-sm">
+                            <div class="progress-bar bg-primary" style="width: 75%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <small>Logical Reasoning</small>
+                            <small>68%</small>
+                        </div>
+                        <div class="progress progress-sm">
+                            <div class="progress-bar bg-info" style="width: 68%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <small>Rebuttal Skills</small>
+                            <small>82%</small>
+                        </div>
+                        <div class="progress progress-sm">
+                            <div class="progress-bar bg-success" style="width: 82%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <small>Speech Delivery</small>
+                            <small>71%</small>
+                        </div>
+                        <div class="progress progress-sm">
+                            <div class="progress-bar bg-warning" style="width: 71%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Achievements -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i data-feather="award" class="me-2"></i>
+                        Achievements
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if profile.achievements %}
+                    {% for achievement in profile.achievements %}
+                    <div class="achievement-item d-flex align-items-center p-2 rounded mb-2">
+                        <div class="me-3" style="font-size: 1.5rem;">
+                            {{ achievement.icon if achievement.icon else '🏆' }}
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0">{{ achievement.name }}</h6>
+                            <small class="text-muted">{{ achievement.description }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-3">
+                        <i data-feather="star" class="text-muted mb-2" style="width: 32px; height: 32px;"></i>
+                        <p class="text-muted">No achievements yet</p>
+                        <small class="text-muted">Complete lessons and debates to earn achievements!</small>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i data-feather="zap" class="me-2"></i>
+                        Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('learning') }}" class="btn btn-outline-primary">
+                            <i data-feather="book-open" class="me-2"></i>
+                            Continue Learning
+                        </a>
+                        <a href="{{ url_for('debate') }}" class="btn btn-outline-success">
+                            <i data-feather="users" class="me-2"></i>
+                            Start New Debate
+                        </a>
+                        <a href="{{ url_for('case_prep') }}" class="btn btn-outline-info">
+                            <i data-feather="file-text" class="me-2"></i>
+                            Prepare Case
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Performance Chart
+const ctx = document.getElementById('performanceChart').getContext('2d');
+const recentPerformance = {{ analytics.recent_performance | tojsonfilter | safe }};
+
+// Prepare chart data
+const chartLabels = recentPerformance.map((_, index) => `Debate ${recentPerformance.length - index}`);
+const chartData = recentPerformance.map(debate => debate.result.overall_score);
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: chartLabels,
+        datasets: [{
+            label: 'Debate Score',
+            data: chartData,
+            borderColor: 'rgb(13, 110, 253)',
+            backgroundColor: 'rgba(13, 110, 253, 0.1)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 100,
+                grid: {
+                    color: 'rgba(255, 255, 255, 0.1)'
+                },
+                ticks: {
+                    callback: function(value) {
+                        return value + '%';
+                    }
+                }
+            },
+            x: {
+                grid: {
+                    color: 'rgba(255, 255, 255, 0.1)'
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        return `Score: ${context.parsed.y}/100`;
+                    }
+                }
+            }
+        }
+    }
+});
+
+function levelUp() {
+    const currentLevel = '{{ analytics.current_level }}';
+    let nextLevel = 'intermediate';
+    
+    if (currentLevel === 'beginner') {
+        nextLevel = 'intermediate';
+    } else if (currentLevel === 'intermediate') {
+        nextLevel = 'advanced';
+    }
+    
+    if (confirm(`Congratulations! Ready to advance to ${nextLevel} level?`)) {
+        fetch('/api/user/level', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'level=' + nextLevel
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+}
+
+// Initialize tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    feather.replace();
+});
+</script>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+{% endblock %}

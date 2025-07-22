@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Error - Debate Sage{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="alert alert-danger text-center" role="alert">
+                <i data-feather="alert-circle" class="mb-3" style="width: 48px; height: 48px;"></i>
+                <h4 class="alert-heading">System Error</h4>
+                <p class="mb-0">{{ error }}</p>
+                <hr>
+                <p class="mb-0">Please try again later or contact support if the problem persists.</p>
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="{{ url_for('index') }}" class="btn btn-primary">
+                    <i data-feather="home" class="me-2"></i>
+                    Return to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

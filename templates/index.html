@@ -1,0 +1,327 @@
+{% extends "base.html" %}
+
+{% block title %}Debate Sage{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <div class="row text-center mb-5">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="display-4 fw-bold mb-4">
+                <i data-feather="message-circle" class="me-3"></i>
+                Debate Sage
+            </h1>
+            <p class="lead mb-4">
+                Master the art of debate with AI-powered learning, live practice sessions, 
+                and comprehensive skill tracking. From beginner to advanced - we'll guide your journey.
+            </p>
+            <div class="d-flex justify-content-center gap-3 flex-wrap hero-buttons">
+                <a href="{{ url_for('learning') }}" class="btn btn-primary btn-lg interactive-pulse">
+                    <i data-feather="book-open" class="me-2"></i>
+                    Start Learning
+                </a>
+                <a href="{{ url_for('debate') }}" class="btn btn-outline-light btn-lg">
+                    <i data-feather="users" class="me-2"></i>
+                    Live Debate
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feature Overview -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-4">
+            <div class="card h-100 text-center feature-card">
+                <div class="card-body">
+                    <div class="feature-icon mb-3">
+                        <i data-feather="cpu" style="width: 48px; height: 48px;" class="text-primary"></i>
+                    </div>
+                    <h5 class="card-title glow-on-hover">AI-Powered Learning</h5>
+                    <p class="card-text">
+                        Interactive lessons with personalized feedback from advanced AI. 
+                        Learn debate formats, techniques, and strategies at your own pace.
+                    </p>
+                    <a href="{{ url_for('learning') }}" class="btn btn-outline-primary">
+                        Explore Lessons
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card h-100 text-center feature-card">
+                <div class="card-body">
+                    <div class="feature-icon mb-3">
+                        <i data-feather="mic" style="width: 48px; height: 48px;" class="text-success"></i>
+                    </div>
+                    <h5 class="card-title glow-on-hover">Live Mock Debates</h5>
+                    <p class="card-text">
+                        Practice with intelligent AI opponents in real-time debates. 
+                        Multiple formats supported with comprehensive evaluation.
+                    </p>
+                    <a href="{{ url_for('debate') }}" class="btn btn-outline-success">
+                        Start Debating
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card h-100 text-center feature-card">
+                <div class="card-body">
+                    <div class="feature-icon mb-3">
+                        <i data-feather="trending-up" style="width: 48px; height: 48px;" class="text-info"></i>
+                    </div>
+                    <h5 class="card-title glow-on-hover">Progress Tracking</h5>
+                    <p class="card-text">
+                        Detailed analytics, achievement system, and performance insights 
+                        to track your improvement over time.
+                    </p>
+                    <a href="{{ url_for('progress') }}" class="btn btn-outline-info">
+                        View Progress
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Status -->
+    {% if profile %}
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card bg-gradient neon-border">
+                <div class="card-header">
+                    <h5 class="mb-0 glow-on-hover">
+                        <i data-feather="user" class="me-2"></i>
+                        Your Progress Summary
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="stat-item">
+                                <h3 class="cyber-text">{{ profile.points }}</h3>
+                                <small class="text-muted">Total Points</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="stat-item">
+                                <h3 class="cyber-text">{{ profile.completed_lessons|length }}</h3>
+                                <small class="text-muted">Lessons Completed</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="stat-item">
+                                <h3 class="cyber-text">{{ profile.debate_history|length }}</h3>
+                                <small class="text-muted">Debates Finished</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="stat-item">
+                                <h3 class="cyber-text">{{ profile.achievements|length }}</h3>
+                                <small class="text-muted">Achievements</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <span class="badge bg-primary fs-6 px-3 py-2">
+                            Current Level: {{ profile.level.title() }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Recent Achievements -->
+    {% if profile.achievements %}
+    <div class="row mb-5">
+        <div class="col-lg-10 mx-auto">
+            <h4 class="text-center mb-4">
+                <i data-feather="award" class="me-2"></i>
+                Recent Achievements
+            </h4>
+            <div class="row g-3">
+                {% for achievement in profile.achievements[-3:] %}
+                <div class="col-md-4">
+                    <div class="card achievement-card">
+                        <div class="card-body text-center">
+                            <div class="achievement-icon mb-2">
+                                {{ achievement.icon if achievement.icon else '🏆' }}
+                            </div>
+                            <h6 class="card-title">{{ achievement.name }}</h6>
+                            <p class="card-text small">{{ achievement.description }}</p>
+                            <span class="badge bg-primary">+{{ achievement.points }} pts</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="text-center mt-3">
+                <a href="{{ url_for('progress') }}" class="btn btn-outline-primary">
+                    View All Achievements
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Getting Started Guide -->
+    <div class="row mb-5">
+        <div class="col-lg-10 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i data-feather="map" class="me-2"></i>
+                        Getting Started
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">
+                                <i data-feather="play-circle" class="me-2"></i>
+                                For Beginners
+                            </h6>
+                            <ol class="list-group list-group-flush">
+                                <li class="list-group-item border-0 px-0">
+                                    <strong>Start with Learning:</strong> Complete basic lessons on debate fundamentals
+                                </li>
+                                <li class="list-group-item border-0 px-0">
+                                    <strong>Practice Case Prep:</strong> Use our AI assistant to prepare arguments
+                                </li>
+                                <li class="list-group-item border-0 px-0">
+                                    <strong>Try Your First Debate:</strong> Start with beginner-level AI opponent
+                                </li>
+                                <li class="list-group-item border-0 px-0">
+                                    <strong>Review & Improve:</strong> Analyze feedback and track progress
+                                </li>
+                            </ol>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-success mb-3">
+                                <i data-feather="target" class="me-2"></i>
+                                For Experienced Debaters
+                            </h6>
+                            <ol class="list-group list-group-flush">
+                                <li class="list-group-item border-0 px-0">
+                                    <strong>Jump into Advanced Debates:</strong> Challenge advanced AI opponents
+                                </li>
+                                <li class="list-group-item border-0 px-0">
+                                    <strong>Explore Multiple Formats:</strong> Try British Parliamentary, Policy, Public Forum
+                                </li>
+                                <li class="list-group-item border-0 px-0">
+                                    <strong>Use Advanced Features:</strong> Note-taking, detailed analytics, POIs
+                                </li>
+                                <li class="list-group-item border-0 px-0">
+                                    <strong>Set Goals:</strong> Aim for specific achievements and skill improvements
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feature Highlights -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h4 class="text-center mb-4">
+                <i data-feather="star" class="me-2"></i>
+                Platform Features
+            </h4>
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="feature-highlight text-center">
+                        <i data-feather="file-text" class="feature-icon-small text-primary mb-2"></i>
+                        <h6>Case Preparation</h6>
+                        <p class="small text-muted">AI-assisted argument generation and strategic planning</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="feature-highlight text-center">
+                        <i data-feather="edit-3" class="feature-icon-small text-success mb-2"></i>
+                        <h6>Note-Taking Assistant</h6>
+                        <p class="small text-muted">Real-time note organization during debates and learning</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="feature-highlight text-center">
+                        <i data-feather="bar-chart" class="feature-icon-small text-info mb-2"></i>
+                        <h6>Performance Analytics</h6>
+                        <p class="small text-muted">Detailed insights into strengths, weaknesses, and progress</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="feature-highlight text-center">
+                        <i data-feather="shield" class="feature-icon-small text-warning mb-2"></i>
+                        <h6>Multiple Formats</h6>
+                        <p class="small text-muted">British Parliamentary, Policy, Public Forum, and more</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.feature-card {
+    transition: transform 0.3s ease;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+.feature-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.stat-item h3 {
+    margin-bottom: 0;
+    font-weight: bold;
+}
+
+.achievement-card {
+    border: none;
+    background: linear-gradient(135deg, rgba(var(--bs-primary-rgb), 0.1), rgba(var(--bs-info-rgb), 0.1));
+    transition: transform 0.2s ease;
+}
+
+.achievement-card:hover {
+    transform: scale(1.05);
+}
+
+.achievement-icon {
+    font-size: 2rem;
+}
+
+.feature-highlight {
+    padding: 1rem;
+    border-radius: 8px;
+    background: rgba(var(--bs-secondary-rgb), 0.1);
+    transition: background 0.3s ease;
+}
+
+.feature-highlight:hover {
+    background: rgba(var(--bs-primary-rgb), 0.1);
+}
+
+.feature-icon-small {
+    width: 32px;
+    height: 32px;
+}
+
+.bg-gradient {
+    background: linear-gradient(135deg, rgba(var(--bs-primary-rgb), 0.1), rgba(var(--bs-secondary-rgb), 0.05));
+}
+</style>
+{% endblock %}

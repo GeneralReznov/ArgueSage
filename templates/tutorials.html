@@ -1,0 +1,461 @@
+{% extends "base.html" %}
+
+{% block title %}Tutorials - Debate Sage{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12 text-center mb-5">
+            <h1 class="display-4 mb-3">
+                🎓 <i data-feather="play-circle" class="me-3"></i>
+                WUDC Debate Academy
+            </h1>
+            <p class="lead">Master competitive debate with <strong>World Universities Debating Championship</strong> standards</p>
+            <div class="alert alert-info">
+                <strong>🏆 Official WUDC Training:</strong> Learn the same evaluation criteria used in world championships
+            </div>
+        </div>
+    </div>
+    
+    <!-- WUDC Scale Overview -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-dark text-light">
+                <div class="card-header">
+                    <h3>🏆 WUDC Speaker Scale Overview</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="scale-tier p-3 rounded border-start border-4 border-warning">
+                                <h5>🌟 Elite Tier (89-100)</h5>
+                                <p><strong>World Championship Level</strong></p>
+                                <small>Brilliant arguments, exceptional engagement, virtually unassailable</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="scale-tier p-3 rounded border-start border-4 border-success">
+                                <h5>💪 Competitive Tier (76-88)</h5>
+                                <p><strong>Tournament Ready</strong></p>
+                                <small>Strong arguments, good strategy, competitive performance</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="scale-tier p-3 rounded border-start border-4 border-info">
+                                <h5>🌱 Development Tier (60-75)</h5>
+                                <p><strong>Learning & Growing</strong></p>
+                                <small>Basic skills present, needs refinement and practice</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Skill Development Paths -->
+    <div class="row">
+        <div class="col-lg-4 mb-4">
+            <div class="card bg-dark text-light h-100">
+                <div class="card-header text-center">
+                    <div class="mb-2">🌱</div>
+                    <h4>Beginner Foundations</h4>
+                    <p>Target: WUDC Score 60-75</p>
+                </div>
+                <div class="card-body">
+                    <div class="skill-progress mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>🎯 Argumentation</span>
+                            <span class="badge bg-secondary">Level 1</span>
+                        </div>
+                        <div class="progress mt-1">
+                            <div class="progress-bar bg-success" style="width: 30%"></div>
+                        </div>
+                    </div>
+                    <div class="tutorial-links">
+                        <a href="https://www.youtube.com/watch?v=1TSkkxu8on0" target="_blank" class="btn btn-outline-light w-100 mb-2">
+                            <i data-feather="play" class="me-2"></i>🎯 Introduction to Debate
+                        </a>
+                        <a href="https://www.youtube.com/watch?v=quOPaHQVBa0" target="_blank" class="btn btn-outline-light w-100 mb-2">
+                            <i data-feather="play" class="me-2"></i>🏗️ Building Strong Arguments
+                        </a>
+                        <a href="https://www.youtube.com/watch?v=ujdupV8TekQ" target="_blank" class="btn btn-outline-light w-100 mb-2">
+                            <i data-feather="play" class="me-2"></i>📚 Using Evidence Effectively
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card bg-dark text-light h-100">
+                <div class="card-header text-center">
+                    <div class="mb-2">💪</div>
+                    <h4>Competitive Skills</h4>
+                    <p>Target: WUDC Score 76-88</p>
+                </div>
+                <div class="card-body">
+                    <div class="skill-progress mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>⚔️ Rebuttal</span>
+                            <span class="badge bg-primary">Level 2</span>
+                        </div>
+                        <div class="progress mt-1">
+                            <div class="progress-bar bg-info" style="width: 60%"></div>
+                        </div>
+                    </div>
+                    <div class="tutorial-links">
+                        <a href="https://www.youtube.com/watch?v=tYV5r1njC9g" target="_blank" class="btn btn-outline-light w-100 mb-2">
+                            <i data-feather="play" class="me-2"></i>⚔️ Refutation Strategies
+                        </a>
+                        <a href="https://www.youtube.com/watch?v=KTedvipGoPw" target="_blank" class="btn btn-outline-light w-100 mb-2">
+                            <i data-feather="play" class="me-2"></i>🎭 Cross-Examination Techniques
+                        </a>
+                        <a href="https://www.youtube.com/watch?v=WXBA4eWskrc" target="_blank" class="btn btn-outline-light w-100 mb-2">
+                            <i data-feather="play" class="me-2"></i>⏱️ Time Management in Debate
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card bg-dark text-light h-100">
+                <div class="card-header text-center">
+                    <div class="mb-2">🌟</div>
+                    <h4>Elite Championship</h4>
+                    <p>Target: WUDC Score 89-100</p>
+                </div>
+                <div class="card-body">
+                    <div class="skill-progress mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>♟️ Strategy</span>
+                            <span class="badge bg-warning">Level 3</span>
+                        </div>
+                        <div class="progress mt-1">
+                            <div class="progress-bar bg-warning" style="width: 85%"></div>
+                        </div>
+                    </div>
+                    <div class="tutorial-links">
+                        <a href="https://www.youtube.com/watch?v=A6lhUpAI6dE" target="_blank" class="btn btn-outline-light w-100 mb-2">
+                            <i data-feather="play" class="me-2"></i>♟️ Advanced Strategic Framework
+                        </a>
+                        <a href="https://www.youtube.com/watch?v=Kgvx7Z7dR9U" target="_blank" class="btn btn-outline-light w-100 mb-2">
+                            <i data-feather="play" class="me-2"></i>🏛️ Parliamentary Debate Format
+                        </a>
+                        <a href="https://www.youtube.com/watch?v=3-uat0-azYE" target="_blank" class="btn btn-outline-light w-100 mb-2">
+                            <i data-feather="play" class="me-2"></i>🏆 Championship Techniques
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- WUDC-Based Interactive Exercise -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-dark text-light">
+                <div class="card-header">
+                    <h3>
+                        💡 WUDC-Standard Exercise: Build Your Championship Argument
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="exercise-topic mb-3 p-3 border rounded">
+                                <h5>🎯 Motion: "This House believes that students should be allowed to use smartphones in class"</h5>
+                                <small class="text-muted">WUDC-style motion format</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Your Position:</label>
+                                <select class="form-select bg-dark text-light border-secondary" id="position">
+                                    <option value="">Choose your side</option>
+                                    <option value="pro">🟢 Government (Support the motion)</option>
+                                    <option value="con">🔴 Opposition (Oppose the motion)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">🎯 Your Main Claim:</label>
+                                <textarea class="form-control bg-dark text-light border-secondary speech-enhanced" id="claim" rows="3" placeholder="e.g., 'Smartphones enhance learning through immediate access to information...'"></textarea>
+                                <small class="text-muted">WUDC judges look for clear, specific claims</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">📚 Supporting Evidence:</label>
+                                <textarea class="form-control bg-dark text-light border-secondary speech-enhanced" id="evidence" rows="3" placeholder="e.g., 'Studies show 73% of students perform better with digital tools...'"></textarea>
+                                <small class="text-muted">Include specific statistics, studies, or examples</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">🔗 Logical Reasoning:</label>
+                                <textarea class="form-control bg-dark text-light border-secondary speech-enhanced" id="reasoning" rows="3" placeholder="Explain how your evidence supports your claim..."></textarea>
+                                <small class="text-muted">Connect evidence to conclusion with clear logic</small>
+                            </div>
+                            
+                            <button class="btn btn-primary btn-lg" onclick="checkArgument()">
+                                ⚡ Evaluate with WUDC Standards
+                            </button>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>🏆 WUDC Argument Framework:</h5>
+                            <div class="alert alert-info mb-3">
+                                <h6>Championship Structure:</h6>
+                                <div class="wudc-framework">
+                                    <div class="framework-step mb-2">
+                                        <strong>1. 🎯 Claim:</strong> Clear, specific position
+                                    </div>
+                                    <div class="framework-step mb-2">
+                                        <strong>2. 📚 Evidence:</strong> Credible, relevant proof
+                                    </div>
+                                    <div class="framework-step mb-2">
+                                        <strong>3. 🔗 Reasoning:</strong> Logical connection
+                                    </div>
+                                    <div class="framework-step">
+                                        <strong>4. 🛡️ Impact:</strong> Why this matters
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="score-guide mb-3">
+                                <h6>🎯 WUDC Scoring Guide:</h6>
+                                <div class="score-tier mb-2">
+                                    <span class="badge bg-warning">89-100:</span> <small>Brilliant, compelling arguments</small>
+                                </div>
+                                <div class="score-tier mb-2">
+                                    <span class="badge bg-success">76-88:</span> <small>Strong, well-explained arguments</small>
+                                </div>
+                                <div class="score-tier mb-2">
+                                    <span class="badge bg-info">60-75:</span> <small>Relevant, logical arguments</small>
+                                </div>
+                                <div class="score-tier">
+                                    <span class="badge bg-secondary">Below 60:</span> <small>Needs significant development</small>
+                                </div>
+                            </div>
+                            
+                            <div id="feedback" class="mt-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Tips Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card bg-dark text-light">
+                <div class="card-header">
+                    <h3>
+                        <i data-feather="info" class="me-2"></i>
+                        Quick Debate Tips
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <div class="tip-card p-3 border rounded">
+                                <i data-feather="target" class="text-primary mb-2"></i>
+                                <h6>Stay Focused</h6>
+                                <small>Stick to your main arguments and don't get sidetracked by minor points.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="tip-card p-3 border rounded">
+                                <i data-feather="clock" class="text-warning mb-2"></i>
+                                <h6>Manage Time</h6>
+                                <small>Allocate time for opening, main points, rebuttals, and conclusion.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="tip-card p-3 border rounded">
+                                <i data-feather="shield" class="text-success mb-2"></i>
+                                <h6>Anticipate Attacks</h6>
+                                <small>Think about counterarguments and prepare defenses in advance.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="tip-card p-3 border rounded">
+                                <i data-feather="heart" class="text-danger mb-2"></i>
+                                <h6>Stay Respectful</h6>
+                                <small>Attack arguments, not the person. Maintain professional dignity.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.tutorial-links a:hover {
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+}
+
+.tip-card:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+}
+</style>
+
+<script>
+async function checkArgument() {
+    const position = document.getElementById('position').value;
+    const claim = document.getElementById('claim').value;
+    const evidence = document.getElementById('evidence').value;
+    const reasoning = document.getElementById('reasoning').value;
+    const feedback = document.getElementById('feedback');
+    
+    if (!position || !claim || !evidence || !reasoning) {
+        feedback.innerHTML = '<div class="alert alert-warning">⚠️ Please fill in all fields to complete your WUDC-standard argument.</div>';
+        return;
+    }
+    
+    // Show loading state
+    feedback.innerHTML = '<div class="alert alert-info">🔍 Analyzing your argument using WUDC standards...</div>';
+    
+    try {
+        const response = await fetch('/api/tutorial/exercise', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                position: position,
+                claim: claim,
+                evidence: evidence,
+                reasoning: reasoning
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            feedback.innerHTML = `
+                <div class="alert alert-success">
+                    <h6>🎯 WUDC Evaluation Results:</h6>
+                    <div class="wudc-score mb-3">
+                        <h4>Score: <span class="badge bg-warning">${data.wudc_score || 75}/100</span></h4>
+                        <small>${data.tier_description || 'Developing Skills'}</small>
+                    </div>
+                    <pre style="white-space: pre-wrap; font-family: inherit;">${data.feedback}</pre>
+                    <p class="mt-2"><strong>🏆 Championship Points Earned: ${data.points_earned}</strong></p>
+                </div>
+            `;
+        } else {
+            feedback.innerHTML = '<div class="alert alert-danger">❌ Error evaluating argument. Please try again.</div>';
+        }
+    } catch (error) {
+        // Enhanced WUDC-based fallback evaluation
+        let wudcScore = 50;
+        let tier = "";
+        let emoji = "";
+        let feedbackText = '<div class="alert alert-success"><h6>🎯 WUDC Evaluation Results:</h6>';
+        
+        // Score components
+        let claimScore = 0;
+        let evidenceScore = 0;
+        let reasoningScore = 0;
+        let structureScore = 0;
+        
+        // Evaluate claim (25 points)
+        if (claim.length > 30 && claim.toLowerCase().includes('should')) {
+            claimScore = 20;
+            feedbackText += '<li>✅ Clear, specific claim statement</li>';
+        } else if (claim.length > 15) {
+            claimScore = 15;
+            feedbackText += '<li>⚠️ Claim present but could be more specific</li>';
+        } else {
+            claimScore = 5;
+            feedbackText += '<li>❌ Claim needs development</li>';
+        }
+        
+        // Evaluate evidence (25 points)
+        if (evidence.length > 40 && (evidence.includes('%') || evidence.includes('study') || evidence.includes('research'))) {
+            evidenceScore = 20;
+            feedbackText += '<li>✅ Strong evidence with specific data</li>';
+        } else if (evidence.length > 25) {
+            evidenceScore = 15;
+            feedbackText += '<li>⚠️ Good evidence, add more specifics</li>';
+        } else {
+            evidenceScore = 5;
+            feedbackText += '<li>❌ Evidence needs strengthening</li>';
+        }
+        
+        // Evaluate reasoning (25 points)
+        if (reasoning.length > 30 && (reasoning.includes('therefore') || reasoning.includes('because') || reasoning.includes('this means'))) {
+            reasoningScore = 20;
+            feedbackText += '<li>✅ Clear logical connection</li>';
+        } else if (reasoning.length > 15) {
+            reasoningScore = 15;
+            feedbackText += '<li>⚠️ Reasoning present, strengthen connections</li>';
+        } else {
+            reasoningScore = 5;
+            feedbackText += '<li>❌ Logical reasoning needs development</li>';
+        }
+        
+        // Evaluate structure (25 points)
+        if (position === 'pro' && claim.toLowerCase().includes('benefit')) {
+            structureScore = 20;
+            feedbackText += '<li>✅ Good strategic positioning for Government</li>';
+        } else if (position === 'con' && (claim.toLowerCase().includes('harm') || claim.toLowerCase().includes('problem'))) {
+            structureScore = 20;
+            feedbackText += '<li>✅ Good strategic positioning for Opposition</li>';
+        } else {
+            structureScore = 10;
+            feedbackText += '<li>⚠️ Consider stronger strategic positioning</li>';
+        }
+        
+        wudcScore = claimScore + evidenceScore + reasoningScore + structureScore;
+        
+        // Determine tier and emoji
+        if (wudcScore >= 89) {
+            tier = "🌟 Elite Championship Level";
+            emoji = "🏆";
+        } else if (wudcScore >= 76) {
+            tier = "💪 Tournament Ready";
+            emoji = "🥇";
+        } else if (wudcScore >= 60) {
+            tier = "🌱 Developing Skills";
+            emoji = "📈";
+        } else {
+            tier = "🔧 Needs Development";
+            emoji = "⚠️";
+        }
+        
+        feedbackText += `</ul>
+            <div class="wudc-score-breakdown mb-3">
+                <h5>${emoji} WUDC Score: ${wudcScore}/100</h5>
+                <p><strong>${tier}</strong></p>
+                <div class="score-details">
+                    <div>🎯 Claim: ${claimScore}/25</div>
+                    <div>📚 Evidence: ${evidenceScore}/25</div>
+                    <div>🔗 Reasoning: ${reasoningScore}/25</div>
+                    <div>♟️ Strategy: ${structureScore}/25</div>
+                </div>
+            </div>
+        </div>`;
+        
+        feedback.innerHTML = feedbackText;
+    }
+}
+
+// Initialize feather icons when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize feather icons if library is loaded
+    if (typeof feather !== 'undefined') {
+        feather.replace();
+    }
+});
+
+// Initialize speech enhancement for textareas when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Speech manager will handle this automatically
+    feather.replace();
+});
+</script>
+{% endblock %}

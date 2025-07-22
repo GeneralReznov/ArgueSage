@@ -1,0 +1,1243 @@
+{% extends "base.html" %}
+
+{% block title %}Live Debate - Debate Sage{% endblock %}
+
+{% block head %}
+<style>
+.speech-timer {
+    font-size: 2rem;
+    font-weight: bold;
+}
+.debate-flow {
+    max-height: 400px;
+    overflow-y: auto;
+}
+.speech-bubble {
+    margin-bottom: 1rem;
+}
+.speech-bubble.user {
+    text-align: right;
+}
+.speech-bubble.ai {
+    text-align: left;
+}
+.poi-indicator {
+    animation: blink 1s infinite;
+}
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0.3; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    {% if current_debate %}
+    <!-- Initialize notes for this debate -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof initializeNotesForDebate === 'function') {
+                initializeNotesForDebate('{{ current_debate.motion }}');
+            }
+        });
+    </script>
+    <!-- Active Debate Interface -->
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Debate Header -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="mb-1">{{ current_debate.motion }}</h5>
+                            <small class="text-muted">
+                                {{ current_debate.format.replace('_', ' ').title() }} • 
+                                Round {{ current_debate.round }} • 
+                                You are {{ current_debate.user_position.title() }}
+                            </small>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="speech-timer" id="speechTimer">--:--</div>
+                            <small class="text-muted">Speaking Time</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Debate Flow -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        <i data-feather="message-square" class="me-2"></i>
+                        Debate Flow
+                    </h6>
+                    <button class="btn btn-sm btn-outline-warning" onclick="offerPOI()" id="poiButton"
+                            {% if current_debate.current_speaker == 'ai' %}disabled{% endif %}>
+                        <i data-feather="hand" class="me-1"></i>
+                        Offer POI
+                    </button>
+                </div>
+                <div class="card-body debate-flow" id="debateFlow">
+                    {% for speech in current_debate.speeches %}
+                    <div class="speech-bubble {{ speech.speaker }}">
+                        <div class="card {% if speech.speaker == 'user' %}bg-primary text-white{% else %}bg-secondary{% endif %}">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    {% if speech.speaker == 'user' %}You{% else %}AI Opponent{% endif %}
+                                    <small class="opacity-75">({{ speech.type.title() }})</small>
+                                </h6>
+                                <div class="card-text">
+                                    <div class="speech-content" style="max-height: 300px; overflow-y: auto;">
+                                        {{ speech.content.replace('\n', '<br>')|safe }}
+                                    </div>
+                                    {% if speech.content|length > 500 %}
+                                    <button class="btn btn-sm btn-outline-light mt-2" onclick="toggleSpeechExpansion(this)">
+                                        <i data-feather="maximize" class="me-1"></i>
+                                        Show Full Speech
+                                    </button>
+                                    {% endif %}
+                                </div>
+                                <small class="opacity-75">{{ speech.timestamp }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Speech Input -->
+            {% if current_debate.status == 'in_progress' and current_debate.current_speaker == 'user' %}
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i data-feather="mic" class="me-2"></i>
+                        Your Speech
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form id="speechForm" onsubmit="submitSpeech(event)">
+                        <div class="mb-3">
+                            <label for="speechText" class="form-label">Deliver your speech:</label>
+                            <textarea class="form-control" id="speechText" name="speech" rows="8" 
+                                     placeholder="Begin your speech here..." required></textarea>
+                            <div class="form-text">
+                                Aim for 3-4 minutes of speaking time (approximately 450-600 words)
+                            </div>
+                            <!-- Speech-to-Text controls will be added here by JavaScript -->
+                        </div>
+                        
+                        <!-- Multi-lingual Support -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Language:</label>
+                                <select class="form-select language-selector" id="debate-language" name="language">
+                                    <option value="en" selected>English</option>
+                                    <option value="hi">हिंदी (Hindi)</option>
+                                    <option value="bn">বাংলা (Bengali)</option>
+                                    <option value="ta">தমிழ் (Tamil)</option>
+                                    <option value="te">తెలుగు (Telugu)</option>
+                                    <option value="mr">मराठी (Marathi)</option>
+                                    <option value="gu">ગુજરાતી (Gujarati)</option>
+                                    <option value="kn">ಕನ್ನಡ (Kannada)</option>
+                                    <option value="ml">മലയാളം (Malayalam)</option>
+                                    <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
+                                    <option value="or">ଓଡ଼ିଆ (Odia)</option>
+                                    <option value="as">অসমীয়া (Assamese)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Speech Type:</label>
+                                <select class="form-select" name="type">
+                                    <option value="constructive">Constructive Speech</option>
+                                    <option value="rebuttal">Rebuttal Speech</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-outline-primary" id="start-speech-recording">
+                                        <i data-feather="mic" class="me-1"></i>
+                                        Record Speech
+                                    </button>
+                                    <button type="button" class="btn btn-outline-info" id="read-speech-aloud">
+                                        <i data-feather="volume-2" class="me-1"></i>
+                                        Read Aloud
+                                    </button>
+                                    <button type="button" class="btn btn-outline-success" id="translate-speech">
+                                        <i data-feather="globe" class="me-1"></i>
+                                        Translate
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <button type="submit" class="btn btn-primary" id="speechSubmitBtn">
+                                    <i data-feather="send" class="me-2"></i>
+                                    Deliver Speech
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% elif current_debate.status == 'in_progress' %}
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="spinner-border text-primary mb-3" role="status"></div>
+                    <h6>AI Opponent is speaking...</h6>
+                    <p class="text-muted">Listen carefully and prepare your response.</p>
+                </div>
+            </div>
+            {% else %}
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5>Debate Complete!</h5>
+                    <p>Would you like to see the final evaluation?</p>
+                    <button class="btn btn-primary" onclick="endDebate()">
+                        <i data-feather="award" class="me-2"></i>
+                        Get Final Evaluation
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Debate Sidebar -->
+        <div class="col-lg-4">
+            <!-- Debate Info -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i data-feather="info" class="me-2"></i>
+                        Debate Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">Format:</dt>
+                        <dd class="col-sm-8">{{ current_debate.format.replace('_', ' ').title() }}</dd>
+                        
+                        <dt class="col-sm-4">Position:</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-primary">{{ current_debate.user_position.title() }}</span>
+                        </dd>
+                        
+                        <dt class="col-sm-4">Difficulty:</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-info">{{ current_debate.difficulty.title() }}</span>
+                        </dd>
+                        
+                        <dt class="col-sm-4">Status:</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-success">{{ current_debate.status.replace('_', ' ').title() }}</span>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+            
+            <!-- Speech Notes -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i data-feather="edit-3" class="me-2"></i>
+                        Smart Notes Assistant
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <textarea class="form-control" rows="6" placeholder="Take notes during the debate..." 
+                              id="debateNotes"></textarea>
+                    <div class="btn-group w-100 mt-2" role="group">
+                        <button class="btn btn-outline-secondary" onclick="saveDebateNotes()">
+                            <i data-feather="save" class="me-2"></i>
+                            Save Notes
+                        </button>
+                        <button class="btn btn-outline-info" onclick="analyzeNotes()">
+                            <i data-feather="cpu" class="me-2"></i>
+                            AI Analysis
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- POI Log -->
+            {% if current_debate.pois %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i data-feather="help-circle" class="me-2"></i>
+                        Points of Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% for poi in current_debate.pois %}
+                    <div class="mb-3">
+                        <small class="text-muted">Your POI:</small>
+                        <div class="bg-light p-2 rounded mb-1" style="color:black">{{ poi.user_poi }}</div>
+                        <small class="text-muted">
+                            AI {{ poi.ai_decision }}: 
+                            <span class="{% if poi.ai_decision == 'ACCEPT' %}text-success{% else %}text-warning{% endif %}">
+                                {{ poi.ai_response }}
+                            </span>
+                        </small>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Debate Controls -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-warning" onclick="endDebate()">
+                            <i data-feather="flag" class="me-2"></i>
+                            End Debate
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% else %}
+    <!-- Debate Setup -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i data-feather="users" class="me-2"></i>
+                        Start Live Debate
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form id="debateSetupForm" onsubmit="startDebate(event)">
+                        <div class="mb-4">
+                            <label for="motion" class="form-label">Debate Motion:</label>
+                            <textarea class="form-control" id="motion" name="motion" rows="3" 
+                                     placeholder="Enter the debate motion (e.g., 'This house believes that social media does more harm than good')" required></textarea>
+                            <div class="form-text">
+                                Enter a clear, debatable proposition that can be argued from both sides.
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="format" class="form-label">Debate Format:</label>
+                                <select class="form-select" id="format" name="format">
+                                    {% for format in formats %}
+                                    <option value="{{ format.name.lower().replace(' ', '_') }}">
+                                        {{ format.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="position" class="form-label">Your Position:</label>
+                                <select class="form-select" id="position" name="position">
+                                    <option value="government">Government (Pro)</option>
+                                    <option value="opposition">Opposition (Con)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="difficulty" class="form-label">AI Opponent Difficulty:</label>
+                            <select class="form-select" id="difficulty" name="difficulty">
+                                <option value="beginner">Beginner - Basic arguments and gentle challenges</option>
+                                <option value="intermediate" selected>Intermediate - Structured arguments with counter-points</option>
+                                <option value="advanced">Advanced - Complex arguments and strategic challenges</option>
+                            </select>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i data-feather="play" class="me-2"></i>
+                                Start Debate
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Format Information -->
+            <div class="row mt-4">
+                {% for format in formats %}
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title">{{ format.name }}</h6>
+                            <p class="card-text small">{{ format.description }}</p>
+                            <ul class="list-unstyled small">
+                                {% for speech in format.speech_order[:3] %}
+                                <li>• {{ speech }}</li>
+                                {% endfor %}
+                                {% if format.speech_order|length > 3 %}
+                                <li>• ... and {{ format.speech_order|length - 3 }} more</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- POI Modal -->
+<div class="modal fade" id="poiModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Offer Point of Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="poiForm" onsubmit="submitPOI(event)">
+                    <div class="mb-3">
+                        <label for="poiText" class="form-label">Your Point of Information:</label>
+                        <textarea class="form-control" id="poiText" name="poi" rows="3" 
+                                 placeholder="Keep it brief and pointed..." required></textarea>
+                        <div class="form-text">
+                            POIs should be short questions or challenges (15-30 seconds when spoken).
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-warning">
+                            <i data-feather="user" class="me-2"></i>
+                            Offer POI
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Evaluation Modal -->
+<div class="modal fade" id="evaluationModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Debate Evaluation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="evaluationContent">
+                <!-- Evaluation content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="{{ url_for('debate') }}" class="btn btn-primary">
+                    <i data-feather="play" class="me-2"></i>
+                    Start New Debate Now
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let speechTimer;
+let secondsElapsed = 0;
+let currentLanguage = 'en';
+
+// Initialize debate speech functionality
+document.addEventListener('DOMContentLoaded', function() {
+    initializeDebateSpeech();
+});
+
+function initializeDebateSpeech() {
+    // Language selector handling
+    const languageSelect = document.getElementById('debate-language');
+    if (languageSelect) {
+        languageSelect.addEventListener('change', function() {
+            currentLanguage = this.value;
+            if (window.speechManager) {
+                window.speechManager.setLanguage(this.value);
+            }
+        });
+    }
+    
+    // Speech recording for debate
+    const recordBtn = document.getElementById('start-speech-recording');
+    if (recordBtn) {
+        recordBtn.addEventListener('click', function() {
+            startDebateSpeechRecording();
+        });
+    }
+    
+    // Read speech aloud
+    const readBtn = document.getElementById('read-speech-aloud');
+    if (readBtn) {
+        readBtn.addEventListener('click', function() {
+            playDebateSpeechTTS();
+        });
+    }
+    
+    // Translate speech
+    const translateBtn = document.getElementById('translate-speech');
+    if (translateBtn) {
+        translateBtn.addEventListener('click', function() {
+            translateDebateSpeech();
+        });
+    }
+}
+
+async function startDebateSpeechRecording() {
+    const recordBtn = document.getElementById('start-speech-recording');
+    const speechTextarea = document.getElementById('speechText');
+    
+    try {
+        recordBtn.disabled = true;
+        recordBtn.innerHTML = '<i data-feather="mic" class="me-1"></i>Recording...';
+        
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mediaRecorder = new MediaRecorder(stream);
+        const audioChunks = [];
+        
+        mediaRecorder.ondataavailable = (event) => {
+            audioChunks.push(event.data);
+        };
+        
+        mediaRecorder.onstop = async () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+            await processSpeechForDebate(audioBlob, speechTextarea);
+            
+            // Stop all tracks
+            stream.getTracks().forEach(track => track.stop());
+            
+            recordBtn.disabled = false;
+            recordBtn.innerHTML = '<i data-feather="mic" class="me-1"></i>Record Speech';
+            feather.replace();
+        };
+        
+        mediaRecorder.start();
+        
+        // Show recording indicator
+        showRecordingIndicator();
+        
+        // Stop recording on next click
+        const stopRecording = () => {
+            mediaRecorder.stop();
+            document.removeEventListener('click', stopRecording);
+            hideRecordingIndicator();
+        };
+        
+        setTimeout(() => {
+            document.addEventListener('click', stopRecording);
+        }, 100);
+        
+    } catch (error) {
+        console.error('Failed to start speech recording:', error);
+        showNotification('Failed to access microphone. Please check permissions.', 'error');
+        
+        recordBtn.disabled = false;
+        recordBtn.innerHTML = '<i data-feather="mic" class="me-1"></i>Record Speech';
+        feather.replace();
+    }
+}
+
+function showRecordingIndicator() {
+    const indicator = document.createElement('div');
+    indicator.id = 'recording-indicator';
+    indicator.className = 'alert alert-info position-fixed';
+    indicator.style.cssText = 'top: 20px; left: 20px; z-index: 9999;';
+    indicator.innerHTML = `
+        <div class="d-flex align-items-center">
+            <div class="spinner-border text-danger me-2" role="status"></div>
+            <span>Recording... Click anywhere to stop</span>
+        </div>
+    `;
+    
+    document.body.appendChild(indicator);
+}
+
+function hideRecordingIndicator() {
+    const indicator = document.getElementById('recording-indicator');
+    if (indicator) {
+        indicator.remove();
+    }
+}
+
+async function processSpeechForDebate(audioBlob, textarea) {
+    try {
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'debate-speech.wav');
+        formData.append('language', currentLanguage);
+        
+        const response = await fetch('/api/speech/speech-to-text', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            const currentText = textarea.value || '';
+            const newText = currentText + (currentText ? ' ' : '') + result.text;
+            textarea.value = newText;
+            
+            // Update word count if available
+            updateWordCount(textarea);
+            
+            showNotification(`Speech converted to text! (${result.service})`, 'success');
+        } else {
+            showNotification(result.error || 'Speech recognition failed', 'error');
+        }
+    } catch (error) {
+        console.error('Failed to process speech:', error);
+        showNotification('Failed to process speech', 'error');
+    }
+}
+
+async function playDebateSpeechTTS() {
+    const textarea = document.getElementById('speechText');
+    const text = textarea.value;
+    
+    if (!text.trim()) {
+        showNotification('No text to read', 'warning');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/speech/text-to-speech', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                text: text,
+                language: currentLanguage
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Play audio
+            const audio = new Audio(`data:audio/mp3;base64,${result.audio_data}`);
+            audio.play();
+            
+            showNotification('Playing speech...', 'info');
+        } else {
+            showNotification(result.error || 'Text-to-speech failed', 'error');
+        }
+    } catch (error) {
+        console.error('Failed to convert text to speech:', error);
+        showNotification('Failed to convert text to speech', 'error');
+    }
+}
+
+function translateDebateSpeech() {
+    const textarea = document.getElementById('speechText');
+    const text = textarea.value;
+    
+    if (!text.trim()) {
+        showNotification('No text to translate', 'warning');
+        return;
+    }
+    
+    // Show translation modal
+    showTranslationModal(text, (translatedText) => {
+        textarea.value = translatedText;
+        updateWordCount(textarea);
+    });
+}
+
+function showTranslationModal(text, callback) {
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.innerHTML = `
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Translate Speech</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">From:</label>
+                        <select id="translate-from" class="form-select">
+                            <option value="en">English</option>
+                            <option value="hi">हिंदी (Hindi)</option>
+                            <option value="bn">বাংলা (Bengali)</option>
+                            <option value="ta">தமிழ் (Tamil)</option>
+                            <option value="te">తెలుగు (Telugu)</option>
+                            <option value="mr">मराठी (Marathi)</option>
+                            <option value="gu">ગુજરાતી (Gujarati)</option>
+                            <option value="kn">ಕನ್ನಡ (Kannada)</option>
+                            <option value="ml">മലയാളം (Malayalam)</option>
+                            <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
+                            <option value="or">ଓଡ଼ିଆ (Odia)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">To:</label>
+                        <select id="translate-to" class="form-select">
+                            <option value="en">English</option>
+                            <option value="hi">हिंदी (Hindi)</option>
+                            <option value="bn">বাংলা (Bengali)</option>
+                            <option value="ta">தமிழ் (Tamil)</option>
+                            <option value="te">తెলুगు (Telugu)</option>
+                            <option value="mr">मराठी (Marathi)</option>
+                            <option value="gu">ગુજરાતી (Gujarati)</option>
+                            <option value="kn">ಕನ್ನಡ (Kannada)</option>
+                            <option value="ml">മലയാളം (Malayalam)</option>
+                            <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
+                            <option value="or">ଓଡ଼ିଆ (Odia)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Translation:</label>
+                        <div id="translation-result" class="form-control" style="min-height: 100px;">
+                            <div class="text-center">
+                                <div class="spinner-border text-primary" role="status"></div>
+                                <div>Translating...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="use-translation">Use Translation</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+    
+    // Set current language
+    document.getElementById('translate-from').value = currentLanguage;
+    document.getElementById('translate-to').value = currentLanguage === 'en' ? 'hi' : 'en';
+    
+    // Event listeners for language selection changes
+    document.getElementById('translate-from').addEventListener('change', function() {
+        const fromLang = this.value;
+        const toLang = document.getElementById('translate-to').value;
+        if (fromLang !== toLang) {
+            performTranslation(text, fromLang, toLang);
+        }
+    });
+    
+    document.getElementById('translate-to').addEventListener('change', function() {
+        const fromLang = document.getElementById('translate-from').value;
+        const toLang = this.value;
+        if (fromLang !== toLang) {
+            performTranslation(text, fromLang, toLang);
+        }
+    });
+    
+    // Auto-translate
+    performTranslation(text, currentLanguage, currentLanguage === 'en' ? 'hi' : 'en');
+    
+    // Event listeners
+    document.getElementById('use-translation').addEventListener('click', () => {
+        const translation = document.getElementById('translation-result').textContent;
+        if (translation && translation !== 'Translating...') {
+            callback(translation);
+            bsModal.hide();
+        }
+    });
+    
+    modal.addEventListener('hidden.bs.modal', () => {
+        document.body.removeChild(modal);
+    });
+}
+
+async function performTranslation(text, fromLang, toLang) {
+    try {
+        const response = await fetch('/api/speech/translate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                text: text,
+                source_language: fromLang,
+                target_language: toLang
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            document.getElementById('translation-result').textContent = result.translated_text;
+        } else {
+            document.getElementById('translation-result').textContent = result.error || 'Translation failed';
+        }
+    } catch (error) {
+        console.error('Translation error:', error);
+        document.getElementById('translation-result').textContent = 'Translation failed';
+    }
+}
+
+function updateWordCount(textarea) {
+    const text = textarea.value;
+    const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+    const wordCount = words.length;
+    
+    // Update word count display if it exists
+    const wordCountDisplay = document.getElementById('word-count');
+    if (wordCountDisplay) {
+        wordCountDisplay.textContent = `${wordCount} words`;
+    }
+    
+    // Add word count display if it doesn't exist
+    if (!wordCountDisplay && textarea.parentNode) {
+        const countDiv = document.createElement('div');
+        countDiv.className = 'form-text';
+        countDiv.id = 'word-count';
+        countDiv.textContent = `${wordCount} words`;
+        textarea.parentNode.appendChild(countDiv);
+    }
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 300px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+function startDebate(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    
+    fetch('/debate/start', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error starting debate: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to start debate');
+    });
+}
+
+function submitSpeech(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    const submitBtn = document.getElementById('speechSubmitBtn');
+    
+    // Get language from form select element
+    const languageSelect = document.getElementById('debate-language');
+    const selectedLanguage = languageSelect ? languageSelect.value : 'en';
+    formData.set('language', selectedLanguage);
+    
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
+    
+    fetch('/debate/speech', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Speech submitted successfully!', 'success');
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            showNotification('Error submitting speech: ' + (data.error || 'Unknown error'), 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Failed to submit speech', 'error');
+    })
+    .finally(() => {
+        // Ensure button is always reset
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i data-feather="send" class="me-2"></i>Deliver Speech';
+        feather.replace();
+    });
+}
+
+function offerPOI() {
+    const modal = new bootstrap.Modal(document.getElementById('poiModal'));
+    modal.show();
+}
+
+function submitPOI(event) {
+    event.preventDefault();
+    
+    const poiText = document.getElementById('poiText').value.trim();
+    if (!poiText) return;
+    
+    // Send POI to new API endpoint
+    fetch('/api/debate/poi', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ poi: poiText })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show AI response
+            showPOIResult(data.decision, data.response);
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('poiModal'));
+            modal.hide();
+            // Clear form
+            document.getElementById('poiForm').reset();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error submitting POI:', error);
+        alert('Failed to submit POI');
+    });
+}
+
+function showPOIResult(decision, response) {
+    const poiLog = document.createElement('div');
+    poiLog.className = 'alert ' + (decision === 'ACCEPT' ? 'alert-success' : 'alert-warning');
+    poiLog.innerHTML = `
+        <strong>AI ${decision}S POI:</strong> ${response}
+        <small class="d-block text-muted mt-1">${new Date().toLocaleTimeString()}</small>
+    `;
+    
+    // Add to debate flow
+    const debateFlow = document.querySelector('.debate-flow');
+    if (debateFlow) {
+        debateFlow.appendChild(poiLog);
+        debateFlow.scrollTop = debateFlow.scrollHeight;
+    }
+}
+
+function endDebate() {
+    if (confirm('Are you sure you want to end this debate?')) {
+        fetch('/debate/end', {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showEvaluation(data.evaluation);
+                // Auto-redirect after showing evaluation for 5 seconds
+                setTimeout(() => {
+                    window.location.href = '/debate';
+                }, 20000);
+            } else {
+                alert('Error ending debate: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+}
+
+function showEvaluation(evaluation) {
+    console.log('Evaluation data received:', evaluation);
+    const content = document.getElementById('evaluationContent');
+    
+    // Safely access properties with fallbacks
+    const overallScore = evaluation.overall_score || 0;
+    const points = evaluation.points || 0;
+    const detailedFeedback = evaluation.detailed_feedback || 'No feedback available.';
+    const speechCount = evaluation.speech_count !== undefined ? evaluation.speech_count : 0;
+    const poiCount = evaluation.poi_count !== undefined ? evaluation.poi_count : 0;
+    const debateDuration = evaluation.debate_duration || 'N/A';
+    
+    content.innerHTML = `
+        <div class="text-center mb-4">
+            <h3 class="text-primary">Overall Score: ${overallScore}/100</h3>
+            <h5>Points Earned: ${points}</h5>
+        </div>
+        <div class="mb-4">
+            <h6>Detailed Feedback:</h6>
+            <div class="border-start border-primary ps-3">
+                ${detailedFeedback.replace(/\n/g, '<br>')}
+            </div>
+        </div>
+        <div class="row text-center mb-4">
+            <div class="col-4">
+                <h6>${speechCount}</h6>
+                <small class="text-muted">Speeches</small>
+            </div>
+            <div class="col-4">
+                <h6>${poiCount}</h6>
+                <small class="text-muted">POIs</small>
+            </div>
+            <div class="col-4">
+                <h6>${debateDuration}</h6>
+                <small class="text-muted">Duration</small>
+            </div>
+        </div>
+        <div class="alert alert-info text-center">
+            <i data-feather="clock" class="me-2"></i>
+            Automatically returning to debate setup in <span id="countdown">5</span> seconds...
+        </div>
+    `;
+    
+    const modal = new bootstrap.Modal(document.getElementById('evaluationModal'));
+    modal.show();
+    
+    // Initialize feather icons
+    if (typeof feather !== 'undefined') {
+        feather.replace();
+    }
+    
+    // Countdown timer
+    let seconds = 20;
+    const countdownElement = document.getElementById('countdown');
+    const countdownInterval = setInterval(() => {
+        seconds--;
+        if (countdownElement) {
+            countdownElement.textContent = seconds;
+        }
+        if (seconds <= 0) {
+            clearInterval(countdownInterval);
+        }
+    }, 1000);
+}
+
+function saveDebateNotes() {
+    const notesText = document.getElementById('debateNotes').value.trim();
+    if (!notesText) {
+        alert('No notes to save');
+        return;
+    }
+    
+    // Get AI analysis of notes
+    fetch('/api/debate/notes/assistant', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+            speech: notesText,
+            type: 'general'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show analysis in a modal
+            showNotesAnalysis(data.analysis);
+            // Prepare notes content for download
+            const notesContent = `DEBATE NOTES
+            Motion: ${getCurrentMotion()}
+            Date: ${new Date().toLocaleString()}
+            =====================================
+
+            ORIGINAL NOTES:
+            ${notesText}
+
+            AI ANALYSIS:
+            ${data.analysis}
+
+            =====================================
+            Generated by DebateSphere Smart Notes Assistant`;
+
+                        // Download notes as txt file
+                        downloadNotesAsTxt(notesContent);
+
+            
+            // Save to user notes
+            saveUserNote({
+                content: notesText,
+                analysis: data.analysis,
+                type: 'debate_notes',
+                motion: getCurrentMotion(),
+                timestamp: new Date().toISOString()
+            });
+            
+            showNotification('Notes saved with AI analysis!', 'success');
+        } else {
+            // Fallback: save without analysis
+            saveUserNote({
+                content: notesText,
+                type: 'debate_notes',
+                motion: getCurrentMotion(),
+                timestamp: new Date().toISOString()
+            });
+            showNotification('Notes saved!', 'success');
+        }
+    })
+    .catch(error => {
+        console.error('Error analyzing notes:', error);
+        // Fallback: save without analysis
+        saveUserNote({
+            content: notesText,
+            type: 'debate_notes',
+            motion: getCurrentMotion(),
+            timestamp: new Date().toISOString()
+        });
+        showNotification('Notes saved (analysis unavailable)!', 'warning');
+    });
+}
+
+function analyzeNotes() {
+    const notesText = document.getElementById('debateNotes').value.trim();
+    if (!notesText) {
+        showNotification('No notes to analyze', 'warning');
+        return;
+    }
+    
+    fetch('/api/debate/notes/assistant', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+            speech: notesText,
+            type: 'analysis'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotesAnalysis(data.analysis);
+        } else {
+            showNotification('Analysis unavailable', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error analyzing notes:', error);
+        showNotification('Failed to analyze notes', 'error');
+    });
+}
+
+function showNotesAnalysis(analysis) {
+    // Create and show analysis modal
+    const analysisModal = document.createElement('div');
+    analysisModal.className = 'modal fade';
+    analysisModal.id = 'notesAnalysisModal';
+    analysisModal.innerHTML = `
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i data-feather="cpu" class="me-2"></i>
+                        AI Notes Analysis
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="bg-light p-3 rounded">
+                        <pre class="mb-0" style="white-space: pre-wrap; font-family: inherit; color:black;">${analysis}</pre>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="copyAnalysis()">Copy Analysis</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(analysisModal);
+    const modal = new bootstrap.Modal(analysisModal);
+    modal.show();
+    
+    // Replace feather icons
+    feather.replace();
+    
+    // Clean up after modal is hidden
+    analysisModal.addEventListener('hidden.bs.modal', () => {
+        document.body.removeChild(analysisModal);
+    });
+}
+
+function copyAnalysis() {
+    const analysisText = document.querySelector('#notesAnalysisModal pre').textContent;
+    navigator.clipboard.writeText(analysisText).then(() => {
+        showNotification('Analysis copied to clipboard!', 'success');
+    });
+}
+
+function getCurrentMotion() {
+    // Extract current motion from page
+    const motionElement = document.querySelector('.card-header h5');
+    return motionElement ? motionElement.textContent : 'Unknown Motion';
+}
+
+    function downloadNotesAsTxt(content) {
+        // Create blob with text content
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+
+        // Create download link
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+
+        // Generate filename with motion and timestamp
+        const motion = getCurrentMotion().replace(/[^a-zA-Z0-9]/g, '_').substring(0, 30);
+        const timestamp = new Date().toISOString().split('T')[0];
+        link.download = `debate_notes_${motion}_${timestamp}.txt`;
+
+        // Trigger download
+        document.body.appendChild(link);
+        link.click();
+
+        // Cleanup
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+
+function saveUserNote(note) {
+    // Save note via API
+    fetch('/api/notes/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(note)
+    })
+    .catch(error => {
+        console.error('Error saving note:', error);
+        // Fallback to localStorage
+        localStorage.setItem('debateNote_' + Date.now(), JSON.stringify(note));
+    });
+}
+
+// Start speech timer if in active debate
+{% if current_debate and current_debate.current_speaker == 'user' %}
+function startSpeechTimer() {
+    speechTimer = setInterval(() => {
+        secondsElapsed++;
+        const minutes = Math.floor(secondsElapsed / 60);
+        const seconds = secondsElapsed % 60;
+        document.getElementById('speechTimer').textContent = 
+            `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }, 1000);
+}
+
+document.addEventListener('DOMContentLoaded', startSpeechTimer);
+{% endif %}
+</script>
+{% endblock %}

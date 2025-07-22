@@ -1,0 +1,467 @@
+{% extends "base.html" %}
+
+{% block title %}Case Preparation - Debate Sage{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i data-feather="file-text" class="me-2"></i>
+                        AI-Powered Case Preparation
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p class="lead">
+                        Get comprehensive case preparation assistance from our AI coach. 
+                        Generate arguments, evidence, and strategic advice for any debate motion.
+                    </p>
+                    
+                    <form id="casePrepForm" onsubmit="generateCase(event)">
+                        <div class="mb-4">
+                            <label for="motion" class="form-label">Debate Motion:</label>
+                            <textarea class="form-control" id="motion" name="motion" rows="3" 
+                                     placeholder="Enter the debate motion you want to prepare for..." required></textarea>
+                            <div class="form-text">
+                                Be specific with your motion for better case preparation.
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="position" class="form-label">Your Position:</label>
+                                <select class="form-select" id="position" name="position" required>
+                                    <option value="">Select your position</option>
+                                    <option value="government">Government (Pro/Affirmative)</option>
+                                    <option value="opposition">Opposition (Con/Negative)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="format" class="form-label">Debate Format:</label>
+                                <select class="form-select" id="format" name="format">
+                                    <option value="general">General Preparation</option>
+                                    <option value="british_parliamentary">British Parliamentary</option>
+                                    <option value="policy_debate">Policy Debate</option>
+                                    <option value="public_forum">Public Forum</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg" id="generateBtn">
+                                <i data-feather="cpu" class="me-2"></i>
+                                Generate Case Preparation
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Generated Case Content -->
+            <div id="caseContent" class="mt-4" style="display: none;">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i data-feather="file-text" class="me-2"></i>
+                            Your Case Preparation
+                        </h5>
+                        <div>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="downloadCase()">
+                                <i data-feather="download" class="me-1"></i>
+                                Download
+                            </button>
+                            <button class="btn btn-outline-primary btn-sm" onclick="printCase()">
+                                <i data-feather="printer" class="me-1"></i>
+                                Print
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body" id="caseDetails">
+                        <!-- Case content will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Case Prep Tips -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i data-feather="zap" class="me-2"></i>
+                        Case Preparation Tips
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <i data-feather="target" class="text-primary me-2"></i>
+                            <strong>Define key terms</strong> clearly and strategically
+                        </li>
+                        <li class="mb-3">
+                            <i data-feather="layers" class="text-info me-2"></i>
+                            <strong>Build layered arguments</strong> with claim, warrant, and impact
+                        </li>
+                        <li class="mb-3">
+                            <i data-feather="shield" class="text-warning me-2"></i>
+                            <strong>Anticipate opposition</strong> arguments and prepare rebuttals
+                        </li>
+                        <li class="mb-3">
+                            <i data-feather="bar-chart" class="text-success me-2"></i>
+                            <strong>Use credible evidence</strong> and statistics to support claims
+                        </li>
+                        <li class="mb-3">
+                            <i data-feather="compass" class="text-secondary me-2"></i>
+                            <strong>Develop strategy</strong> for argument prioritization
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Recent Preparations -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i data-feather="clock" class="me-2"></i>
+                        Recent Preparations
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div id="recentPreps">
+                        <p class="text-muted text-center">No recent preparations</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Motion Generator -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i data-feather="shuffle" class="me-2"></i>
+                        Quick Motion Ideas
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted mb-3">Need inspiration? Try these sample motions:</p>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-secondary btn-sm" onclick="useMotion('This house believes that social media does more harm than good')">
+                            Social Media Impact
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="useMotion('This house would ban single-use plastics')">
+                            Environmental Policy
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="useMotion('This house believes that homework should be abolished')">
+                            Education Reform
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="useMotion('This house would implement universal basic income')">
+                            Economic Policy
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentCase = null;
+
+function generateCase(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const formData = new FormData(form);
+    const generateBtn = document.getElementById('generateBtn');
+    
+    // Update button state
+    generateBtn.disabled = true;
+    generateBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generating...';
+    
+    fetch('/case_prep/generate', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            currentCase = data.case;
+            displayCase(data.case, formData.get('motion'), formData.get('position'));
+            saveToRecent(formData.get('motion'), formData.get('position'));
+        } else {
+            alert('Error generating case: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to generate case preparation');
+    })
+    .finally(() => {
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = '<i data-feather="cpu" class="me-2"></i>Generate Case Preparation';
+        feather.replace();
+    });
+}
+
+function displayCase(caseData, motion, position) {
+    const caseContent = document.getElementById('caseContent');
+    const caseDetails = document.getElementById('caseDetails');
+    
+    // Parse case sections if available
+    const sections = caseData.sections || {};
+    const fullText = caseData.full_text || '';
+    
+    let html = `
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h6>Motion: <span class="text-primary">${motion}</span></h6>
+                <h6>Position: <span class="badge bg-${position === 'government' ? 'success' : 'warning'}">${position.charAt(0).toUpperCase() + position.slice(1)}</span></h6>
+            </div>
+            <div class="col-md-4 text-end">
+                <small class="text-muted">Generated: ${new Date().toLocaleString()}</small>
+            </div>
+        </div>
+        
+        <div class="case-content">
+            <div class="mb-4">
+                <h6 class="border-bottom pb-2">
+                    <i data-feather="file-text" class="me-2"></i>
+                    📋 Complete Case Brief
+                </h6>
+                <div class="bg-light p-4 rounded text-dark" style="white-space: pre-wrap; line-height: 1.6; font-size: 0.95rem;">
+                    ${formatCaseText(fullText)}
+                </div>
+            </div>
+    `;
+    
+    // Add structured sections if available
+    if (Object.keys(sections).length > 0) {
+        html += '<h6 class="border-bottom pb-2 mt-4"><i data-feather="layers" class="me-2"></i>Case Sections</h6>';
+        
+        Object.entries(sections).forEach(([sectionName, content]) => {
+            if (content && content.trim()) {
+                // Add icons based on section type
+                let sectionIcon = '📝';
+                let sectionColor = 'primary';
+                
+                switch(sectionName.toLowerCase()) {
+                    case 'definition':
+                        sectionIcon = '🔍';
+                        sectionColor = 'info';
+                        break;
+                    case 'arguments':
+                        sectionIcon = '💪';
+                        sectionColor = 'success';
+                        break;
+                    case 'evidence':
+                        sectionIcon = '📊';
+                        sectionColor = 'warning';
+                        break;
+                    case 'rebuttals':
+                        sectionIcon = '🛡️';
+                        sectionColor = 'danger';
+                        break;
+                    case 'conclusion':
+                        sectionIcon = '🎯';
+                        sectionColor = 'dark';
+                        break;
+                    case 'strategy':
+                        sectionIcon = '🧠';
+                        sectionColor = 'secondary';
+                        break;
+                }
+                
+                html += `
+                    <div class="mb-4">
+                        <h6 class="text-${sectionColor} border-bottom pb-2">
+                            <span class="me-2">${sectionIcon}</span>
+                            ${sectionName.charAt(0).toUpperCase() + sectionName.slice(1)}
+                        </h6>
+                        <div class="ps-3 border-start border-${sectionColor} bg-light p-3 rounded text-dark" style="white-space: pre-wrap;">
+                            ${formatCaseText(content)}
+                        </div>
+                    </div>
+                `;
+            }
+        });
+    }
+    
+    html += '</div>';
+    
+    caseDetails.innerHTML = html;
+    caseContent.style.display = 'block';
+    
+    // Scroll to case content
+    caseContent.scrollIntoView({ behavior: 'smooth' });
+    
+    // Re-initialize feather icons
+    feather.replace();
+}
+
+function downloadCase() {
+    if (!currentCase) return;
+    
+    const motion = document.getElementById('motion').value;
+    const position = document.getElementById('position').value;
+    
+    const content = `
+DEBATE CASE PREPARATION
+======================
+
+Motion: ${motion}
+Position: ${position}
+Generated: ${new Date().toLocaleString()}
+
+${currentCase.full_text}
+    `;
+    
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `case_prep_${Date.now()}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+
+function printCase() {
+    if (!currentCase) return;
+    
+    const printWindow = window.open('', '_blank');
+    const motion = document.getElementById('motion').value;
+    const position = document.getElementById('position').value;
+    
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Case Preparation</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                h1, h2, h3 { color: #333; }
+                .header { border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+                .content { line-height: 1.6; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>Debate Case Preparation</h1>
+                <p><strong>Motion:</strong> ${motion}</p>
+                <p><strong>Position:</strong> ${position}</p>
+                <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
+            </div>
+            <div class="content">
+                ${currentCase.full_text.replace(/\n/g, '<br>')}
+            </div>
+        </body>
+        </html>
+    `);
+    
+    printWindow.document.close();
+    printWindow.print();
+}
+
+function useMotion(motion) {
+    document.getElementById('motion').value = motion;
+}
+
+function saveToRecent(motion, position) {
+    let recent = JSON.parse(localStorage.getItem('recentPreparations') || '[]');
+    
+    recent.unshift({
+        motion: motion,
+        position: position,
+        timestamp: new Date().toISOString()
+    });
+    
+    // Keep only last 5
+    recent = recent.slice(0, 5);
+    
+    localStorage.setItem('recentPreparations', JSON.stringify(recent));
+    updateRecentList();
+}
+
+function updateRecentList() {
+    const recent = JSON.parse(localStorage.getItem('recentPreparations') || '[]');
+    const container = document.getElementById('recentPreps');
+    
+    if (recent.length === 0) {
+        container.innerHTML = '<p class="text-muted text-center">No recent preparations</p>';
+        return;
+    }
+    
+    const html = recent.map(prep => `
+        <div class="mb-2 p-3 border rounded cursor-pointer hover-bg-light" onclick="useMotion('${prep.motion.replace(/'/g, "\\'")}')">
+            <div class="small text-white fw-bold mb-1">
+                ${prep.motion.substring(0, 50)}${prep.motion.length > 50 ? '...' : ''}
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="badge bg-${prep.position === 'government' ? 'success' : 'warning'}">${prep.position}</span>
+                <small class="text-muted">${new Date(prep.timestamp).toLocaleDateString()}</small>
+            </div>
+        </div>
+    `).join('');
+    
+    container.innerHTML = html;
+}
+
+// Format case text to remove markdown and improve presentation
+function formatCaseText(text) {
+    if (!text) return '';
+    
+    return text
+        // Remove any remaining markdown bold formatting (**)
+        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-primary">$1</strong>')
+        // Handle emoji headers with clear section formatting
+        .replace(/^(🔍|📊|💪|🛡️|🎯|🧠|📝|⚖️|🎪|📋)\s*(.*?)$/gm, function(match, emoji, title) {
+            // Only format as header if it looks like a section title (short and likely capitalized)
+            if (title.length < 50 && title.match(/^[A-Z\s&]+$/)) {
+                return `<h5 class="text-primary mt-4 mb-3 fw-bold border-bottom pb-2"><span class="me-2 fs-4">${emoji}</span>${title}</h5>`;
+            }
+            return match; // Return unchanged if not a header
+        })
+        // Handle section headers without emojis but in ALL CAPS
+        .replace(/^([A-Z\s&]{3,30})$/gm, '<h6 class="text-secondary mt-4 mb-2 fw-bold border-bottom pb-1">$1</h6>')
+        // Format bullet points with better styling
+        .replace(/^-\s*(.*$)/gm, '<div class="ms-3 mb-2 d-flex"><i class="fas fa-circle text-primary me-2 mt-2" style="font-size: 0.4rem;"></i><span>$1</span></div>')
+        // Format numbered points with colored badges
+        .replace(/^(\d+)\.\s*(.*$)/gm, '<div class="ms-3 mb-2 d-flex align-items-start"><span class="badge bg-primary me-2 mt-1">$1</span><span>$2</span></div>')
+        // Add better paragraph spacing
+        .replace(/\n\n+/g, '<br><br>')
+        .replace(/\n/g, '<br>');
+}
+
+// Add hover effects with CSS
+function addCustomStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+        .cursor-pointer { cursor: pointer; }
+        .hover-bg-light:hover { 
+            background-color: rgba(var(--bs-primary-rgb), 0.1) !important; 
+            transform: translateX(3px);
+            transition: all 0.2s ease;
+        }
+        .case-content h5 {
+            background: linear-gradient(45deg, var(--bs-primary), var(--bs-info));
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            font-weight: 700;
+        }
+        .case-content .badge {
+            font-size: 0.75em;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// Load recent preparations on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateRecentList();
+    addCustomStyles();
+});
+</script>
+{% endblock %}

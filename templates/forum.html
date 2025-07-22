@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}Discussion Forum - Debate Sage{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12 text-center mb-5">
+            <h1 class="display-4 mb-3">
+                <i data-feather="message-square" class="me-3"></i>
+                Discussion Forum
+            </h1>
+            <p class="lead">Engage in debates with AI participants on trending topics</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card bg-dark text-light">
+                <div class="card-header">
+                    <h3>
+                        <i data-feather="flame" class="me-2 text-warning"></i>
+                        Hot Topics
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {% for topic in forum_topics %}
+                    <div class="topic-item p-3 mb-3 border rounded" style="cursor: pointer;" onclick="joinDiscussion({{ topic.id }}, '{{ topic.title }}')">
+                        <h5>{{ topic.title }}</h5>
+                        <div class="d-flex gap-3 mt-2">
+                            <small>
+                                <i data-feather="users" class="me-1"></i>
+                                {{ topic.participants }} participants
+                            </small>
+                            <small>
+                                <i data-feather="message-circle" class="me-1"></i>
+                                {{ topic.messages }} messages
+                            </small>
+                            <small>
+                                <i data-feather="clock" class="me-1"></i>
+                                {{ topic.lastActivity }}
+                            </small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card bg-dark text-light mb-4">
+                <div class="card-header">
+                    <h4>
+                        <i data-feather="users" class="me-2"></i>
+                        Active Participants
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="user-list">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="bg-success rounded-circle me-2" style="width: 10px; height: 10px;"></div>
+                            <span>Priya Patel</span>
+                            <small class="ms-auto text-muted">Debating</small>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="bg-success rounded-circle me-2" style="width: 10px; height: 10px;"></div>
+                            <span>Vikram Singh</span>
+                            <small class="ms-auto text-muted">Writing</small>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="bg-success rounded-circle me-2" style="width: 10px; height: 10px;"></div>
+                            <span>Ananya Gupta</span>
+                            <small class="ms-auto text-muted">Analyzing</small>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="bg-success rounded-circle me-2" style="width: 10px; height: 10px;"></div>
+                            <span>Arjun Sharma</span>
+                            <small class="ms-auto text-muted">Reading</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card bg-dark text-light">
+                <div class="card-header">
+                    <h4>
+                        <i data-feather="help-circle" class="me-2"></i>
+                        How It Works
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <ol class="list-group list-group-flush">
+                        <li class="list-group-item bg-transparent text-light border-secondary">
+                            Choose a topic that interests you
+                        </li>
+                        <li class="list-group-item bg-transparent text-light border-secondary">
+                            Join the discussion with AI participants
+                        </li>
+                        <li class="list-group-item bg-transparent text-light border-secondary">
+                            Practice argumentation in real-time
+                        </li>
+                        <li class="list-group-item bg-transparent text-light border-secondary">
+                            Learn from diverse perspectives
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Discussion Modal -->
+<div class="modal fade" id="discussionModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content bg-dark text-light">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title" id="discussionTitle">Discussion</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="chatMessages" class="bg-black p-3 rounded mb-3" style="height: 400px; overflow-y: auto;">
+                    <!-- Messages will be added here -->
+                </div>
+                <div class="input-group">
+                    <input type="text" class="form-control bg-dark text-light border-secondary" id="messageInput" placeholder="Share your thoughts..." onkeypress="handleInput(event)">
+                    <button class="btn btn-primary" onclick="sendMessage()">
+                        <i data-feather="send"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.topic-item:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    transform: translateX(5px);
+    transition: all 0.3s ease;
+}
+
+.message {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-radius: 15px;
+}
+
+.message.user {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    margin-left: 2rem;
+}
+
+.message.ai {
+    background: rgba(255, 255, 255, 0.1);
+    margin-right: 2rem;
+}
+</style>
+
+<script>
+let currentTopicId = null;
+
+function joinDiscussion(topicId, title) {
+    currentTopicId = topicId;
+    document.getElementById('discussionTitle').textContent = title;
+    loadMessages(topicId);
+    new bootstrap.Modal(document.getElementById('discussionModal')).show();
+}
+
+function loadMessages(topicId) {
+    const container = document.getElementById('chatMessages');
+    container.innerHTML = '';
+    
+    // Sample messages based on topic
+    const messages = {
+        1: [
+            { author: "Priya Patel", content: "The Digital India initiative has definitely improved government services accessibility, but at what cost to our privacy?", isAI: true },
+            { author: "Vikram Singh", content: "Privacy concerns are valid, but we can't ignore how it's bridging the digital divide in rural areas.", isAI: true }
+        ],
+        2: [
+            { author: "Ananya Gupta", content: "Online learning offers flexibility, but can it truly replace the interactive environment of traditional classrooms?", isAI: true },
+            { author: "Rohan Kumar", content: "The pandemic showed us online learning's potential, but also highlighted the importance of face-to-face interaction for holistic development.", isAI: true }
+        ],
+        3: [
+            { author: "Kavya Iyer", content: "Environmental conservation shouldn't come at the expense of economic development. We need sustainable solutions that address both.", isAI: true },
+            { author: "Aditya Joshi", content: "But isn't prioritizing short-term economic gains exactly what got us into this environmental crisis?", isAI: true }
+        ],
+        4: [
+            { author: "Neha Sharma", content: "Startup culture promotes innovation, but the 'work hard, play hard' mentality often leads to burnout among young professionals.", isAI: true },
+            { author: "Rajesh Kumar", content: "The question is whether we can maintain innovation while ensuring employee well-being. Some companies are finding that balance.", isAI: true }
+        ]
+    };
+    
+    const topicMessages = messages[topicId] || messages[1];
+    
+    topicMessages.forEach(msg => {
+        addMessage(msg.author, msg.content, msg.isAI);
+    });
+}
+
+function addMessage(author, content, isAI) {
+    const container = document.getElementById('chatMessages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${isAI ? 'ai' : 'user'}`;
+    messageDiv.innerHTML = `
+        <div class="d-flex justify-content-between mb-1">
+            <strong>${author}</strong>
+            <small>Just now</small>
+        </div>
+        <div>${content}</div>
+    `;
+    container.appendChild(messageDiv);
+    container.scrollTop = container.scrollHeight;
+}
+
+function handleInput(event) {
+    if (event.key === 'Enter') {
+        sendMessage();
+    }
+}
+
+async function sendMessage() {
+    const input = document.getElementById('messageInput');
+    const message = input.value.trim();
+    if (!message) return;
+    
+    addMessage('You', message, false);
+    input.value = '';
+    
+    // Show typing indicator
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'message ai';
+    typingDiv.innerHTML = '<div><em>Participant is typing...</em></div>';
+    document.getElementById('chatMessages').appendChild(typingDiv);
+    
+    try {
+        const response = await fetch('/api/forum/ai-response', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                message: message,
+                context: document.getElementById('discussionTitle').textContent
+            })
+        });
+        
+        const data = await response.json();
+        
+        // Remove typing indicator
+        typingDiv.remove();
+        
+        // Add AI response
+        const aiNames = ['Priya Patel', 'Vikram Singh', 'Ananya Gupta', 'Arjun Sharma', 'Kavya Iyer', 'Neha Sharma'];
+        const aiName = aiNames[Math.floor(Math.random() * aiNames.length)];
+        addMessage(aiName, data.message, true);
+        
+    } catch (error) {
+        typingDiv.remove();
+        addMessage('System', 'Sorry, there was an error. Please try again.', true);
+    }
+}
+
+// Initialize Feather icons when modal opens
+document.getElementById('discussionModal').addEventListener('shown.bs.modal', function() {
+    feather.replace();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}Learning & Practice - Debate Sage{% endblock %}
+
+{% block head %}
+<style>
+.lesson-card {
+    transition: transform 0.2s;
+}
+.lesson-card:hover {
+    transform: translateY(-2px);
+}
+.achievement-badge {
+    animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8">
+            {% if current_lesson %}
+            <!-- Lesson Detail View -->
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">{{ current_lesson.title }}</h4>
+                    <small class="text-muted">{{ current_lesson.level.title() }} Level</small>
+                </div>
+                <div class="card-body">
+                    <p class="lead">{{ current_lesson.description }}</p>
+                    
+                    <div class="lesson-content mb-4">
+                        <h6>Lesson Content:</h6>
+                        <div class="border-start border-primary ps-3">
+                            {{ current_lesson.content | safe }}
+                        </div>
+                    </div>
+                    
+                    <div class="exercise-section">
+                        <h6>Practice Exercise:</h6>
+                        <div class="alert alert-info">
+                            <i data-feather="edit-3" class="me-2"></i>
+                            {{ current_lesson.exercise }}
+                        </div>
+                        
+                        <form id="exerciseForm" onsubmit="submitExercise(event)">
+                            <input type="hidden" name="lesson_id" value="{{ current_lesson.id }}">
+                            <div class="mb-3">
+                                <label for="answer" class="form-label">Your Answer:</label>
+                                <textarea class="form-control" id="answer" name="answer" rows="5" 
+                                         placeholder="Type your response here..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <i data-feather="send" class="me-2"></i>
+                                Submit Answer
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <div id="feedbackSection" class="mt-4" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">AI Feedback</h6>
+                            </div>
+                            <div class="card-body" id="feedbackContent">
+                                <!-- Feedback will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="{{ url_for('learning') }}" class="btn btn-outline-secondary">
+                            <i data-feather="arrow-left" class="me-2"></i>
+                            Back to Lessons
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            {% else %}
+            <!-- Lessons Overview -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Learning & Practice</h2>
+                <div class="dropdown">
+                    <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        Filter: All Levels
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="filterLessons('all')">All Levels</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" onclick="filterLessons('beginner')">Beginner</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="filterLessons('intermediate')">Intermediate</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="filterLessons('advanced')">Advanced</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="row g-4" id="lessonsContainer">
+                {% for lesson in lessons %}
+                <div class="col-md-6 lesson-item" data-level="{{ lesson.level }}">
+                    <div class="card lesson-card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <h5 class="card-title">{{ lesson.title }}</h5>
+                                {% if lesson.id in profile.completed_lessons %}
+                                <span class="badge bg-success">
+                                    <i data-feather="check" class="me-1"></i>
+                                    Completed
+                                </span>
+                                {% else %}
+                                <span class="badge bg-secondary">{{ lesson.points }} pts</span>
+                                {% endif %}
+                            </div>
+                            
+                            <p class="card-text">{{ lesson.description }}</p>
+                            
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    Level: <span class="badge bg-info">{{ lesson.level.title() }}</span>
+                                </small>
+                            </div>
+                            
+                            <a href="{{ url_for('lesson_detail', lesson_id=lesson.id) }}" 
+                               class="btn {% if lesson.id in profile.completed_lessons %}btn-outline-success{% else %}btn-primary{% endif %}">
+                                {% if lesson.id in profile.completed_lessons %}
+                                <i data-feather="refresh-cw" class="me-2"></i>
+                                Review
+                                {% else %}
+                                <i data-feather="play" class="me-2"></i>
+                                Start Lesson
+                                {% endif %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            {% if not lessons %}
+            <div class="text-center py-5">
+                <i data-feather="book" class="text-muted mb-3" style="width: 64px; height: 64px;"></i>
+                <h4 class="text-muted">No lessons available for your current level</h4>
+                <p>Try adjusting your skill level or check back later for new content.</p>
+            </div>
+            {% endif %}
+            {% endif %}
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Progress Summary -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i data-feather="target" class="me-2"></i>
+                        Your Progress
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <h4 class="text-primary">{{ profile.points }}</h4>
+                            <small class="text-muted">Points</small>
+                        </div>
+                        <div class="col-4">
+                            <h4 class="text-success">{{ profile.completed_lessons|length }}</h4>
+                            <small class="text-muted">Lessons</small>
+                        </div>
+                        <div class="col-4">
+                            <h4 class="text-info">{{ profile.level.title() }}</h4>
+                            <small class="text-muted">Level</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Achievements -->
+            {% if profile.achievements %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i data-feather="award" class="me-2"></i>
+                        Recent Achievements
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% for achievement in profile.achievements[-3:] %}
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="achievement-badge me-3" style="font-size: 1.5rem;">
+                            {{ achievement.icon if achievement.icon else '🏆' }}
+                        </span>
+                        <div>
+                            <h6 class="mb-0">{{ achievement.name }}</h6>
+                            <small class="text-muted">{{ achievement.description }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Learning Tips -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i data-feather="zap" class="me-2"></i>
+                        Learning Tips
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i data-feather="check-circle" class="text-success me-2"></i>
+                            Practice regularly for best results
+                        </li>
+                        <li class="mb-2">
+                            <i data-feather="check-circle" class="text-success me-2"></i>
+                            Apply lessons in live debates
+                        </li>
+                        <li class="mb-2">
+                            <i data-feather="check-circle" class="text-success me-2"></i>
+                            Review AI feedback carefully
+                        </li>
+                        <li class="mb-2">
+                            <i data-feather="check-circle" class="text-success me-2"></i>
+                            Progress gradually through levels
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/learning.js') }}"></script>
+{% endblock %}

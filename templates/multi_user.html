@@ -1,0 +1,677 @@
+{% extends "base.html" %}
+
+{% block title %}Multi-User Practice - Debate Sage{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12 text-center mb-5">
+            <h1 class="display-4 mb-3">
+                <i data-feather="globe" class="me-3"></i>
+                Multi-User Practice Arena
+            </h1>
+            <p class="lead">Practice with fellow students in real-time collaborative sessions</p>
+        </div>
+    </div>
+    
+    <!-- Connection Status -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-dark text-light">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-success rounded-circle me-2 pulse" style="width: 10px; height: 10px;"></div>
+                            <strong>Online</strong> - Connected to practice network
+                        </div>
+                        <div>
+                            <i data-feather="users" class="me-2"></i>
+                            <strong>47</strong> Active Debaters
+                        </div>
+                        <div>
+                            <i data-feather="wifi" class="me-2"></i>
+                            Connection: <strong class="text-success">Excellent</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card bg-dark text-light">
+                <div class="card-header">
+                    <h3>
+                        <i data-feather="plus-circle" class="me-2"></i>
+                        Create Practice Room
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form id="createRoomForm">
+                        <div class="mb-3">
+                            <label class="form-label">Room Name</label>
+                            <input type="text" name="room_name" class="form-control bg-dark text-light border-secondary" placeholder="Enter room name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Your Name</label>
+                            <input type="text" name="creator_name" class="form-control bg-dark text-light border-secondary" placeholder="Enter your name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Debate Format</label>
+                            <select name="format" class="form-select bg-dark text-light border-secondary" required>
+                                <option value="pro_con">Pro vs Con</option>
+                                <option value="british_parliamentary">British Parliamentary</option>
+                                <option value="oxford">Oxford Style</option>
+                                <option value="fishbowl">Fishbowl Discussion</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Maximum Participants</label>
+                            <select name="max_participants" class="form-select bg-dark text-light border-secondary" required>
+                                <option value="2">2 participants</option>
+                                <option value="4" selected>4 participants</option>
+                                <option value="6">6 participants</option>
+                                <option value="8">8 participants</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Skill Level</label>
+                            <select name="skill_level" class="form-select bg-dark text-light border-secondary" required>
+                                <option value="beginner">Beginner</option>
+                                <option value="intermediate" selected>Intermediate</option>
+                                <option value="advanced">Advanced</option>
+                                <option value="mixed">Mixed Levels</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i data-feather="plus-circle" class="me-2"></i>Create Room
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6 mb-4">
+            <div class="card bg-dark text-light">
+                <div class="card-header">
+                    <h3>
+                        <i data-feather="log-in" class="me-2"></i>
+                        Join Practice Room
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form id="joinRoomForm">
+                        <div class="mb-3">
+                            <label class="form-label">Room Code</label>
+                            <input type="text" name="room_code" class="form-control bg-dark text-light border-secondary" placeholder="Enter 6-digit room code" maxlength="6" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Your Display Name</label>
+                            <input type="text" name="participant_name" class="form-control bg-dark text-light border-secondary" placeholder="Enter your name" required>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">
+                            <i data-feather="users" class="me-2"></i>Join Room
+                        </button>
+                    </form>
+                    
+                    <div class="text-center mt-4">
+                        <h6>Quick Join via QR Code</h6>
+                        <div id="qrCodeContainer" class="border border-2 border-secondary rounded p-4" style="border-style: dashed !important;">
+                            <i data-feather="smartphone" style="width: 3rem; height: 3rem;" class="text-muted"></i>
+                            <p class="mt-2 mb-0 text-muted">QR code will appear when room is created</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Active Rooms -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-dark text-light">
+                <div class="card-header">
+                    <h3>
+                        <i data-feather="globe" class="me-2"></i>
+                        Public Practice Rooms
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div id="activeRoomsList">
+                        <!-- Active rooms will be loaded here dynamically -->
+                        <div class="text-center text-muted">
+                            <i data-feather="loader" class="me-2"></i>Loading active rooms...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Features Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card bg-dark text-light">
+                <div class="card-header">
+                    <h3>
+                        <i data-feather="star" class="me-2"></i>
+                        Multi-User Features
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <div class="feature-highlight p-3 border rounded text-center">
+                                <i data-feather="mic" class="text-primary mb-2" style="width: 2rem; height: 2rem;"></i>
+                                <h6>Voice Chat</h6>
+                                <small>Real-time voice debate with high-quality audio</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="feature-highlight p-3 border rounded text-center">
+                                <i data-feather="edit-3" class="text-success mb-2" style="width: 2rem; height: 2rem;"></i>
+                                <h6>Shared Notes</h6>
+                                <small>Collaborative note-taking and argument building</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="feature-highlight p-3 border rounded text-center">
+                                <i data-feather="clock" class="text-warning mb-2" style="width: 2rem; height: 2rem;"></i>
+                                <h6>Timer System</h6>
+                                <small>Automatic speech timing and turn management</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="feature-highlight p-3 border rounded text-center">
+                                <i data-feather="award" class="text-danger mb-2" style="width: 2rem; height: 2rem;"></i>
+                                <h6>Peer Feedback</h6>
+                                <small>Get constructive feedback from other participants</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.room-item:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    transform: translateX(5px);
+    transition: all 0.3s ease;
+}
+
+.feature-highlight:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+}
+
+.rotating {
+    animation: rotate 1s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+</style>
+
+<!-- No external QR library needed - using server-side generation -->
+
+<script>
+// Multi-User Practice Arena JavaScript
+let currentRoom = null;
+let updateInterval = null;
+
+// Initialize the page
+document.addEventListener('DOMContentLoaded', function() {
+    loadActiveRooms();
+    
+    // Auto-refresh active rooms every 10 seconds
+    updateInterval = setInterval(loadActiveRooms, 10000);
+    
+    // Check for auto-join from URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const joinRoomCode = urlParams.get('join');
+    if (joinRoomCode) {
+        document.querySelector('input[name="room_code"]').value = joinRoomCode;
+        document.querySelector('#joinRoomForm input[name="participant_name"]').focus();
+    }
+});
+
+// Load active rooms from API
+async function loadActiveRooms() {
+    try {
+        const response = await fetch('/api/rooms/list');
+        const data = await response.json();
+        
+        if (data.success) {
+            displayActiveRooms(data.rooms);
+        } else {
+            console.error('Failed to load rooms:', data.error);
+        }
+    } catch (error) {
+        console.error('Error loading rooms:', error);
+    }
+}
+
+// Display active rooms
+function displayActiveRooms(rooms) {
+    const container = document.getElementById('activeRoomsList');
+    
+    if (rooms.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-muted p-4">
+                <i data-feather="users" style="width: 3rem; height: 3rem;" class="mb-3"></i>
+                <h5>No Active Rooms</h5>
+                <p>Be the first to create a practice room!</p>
+            </div>
+        `;
+    } else {
+        container.innerHTML = rooms.map(room => {
+            const statusColor = getStatusColor(room.status);
+            const statusText = getStatusText(room.status);
+            const isJoinable = room.status === 'waiting';
+            
+            return `
+                <div class="room-item p-3 mb-3 border-start border-4 border-${statusColor}">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5>${room.name}</h5>
+                        <span class="badge bg-${statusColor}">${statusText}</span>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <small class="text-muted">Participants</small><br>
+                            <i data-feather="users" class="me-1"></i><strong>${room.participants.length}/${room.max_participants}</strong>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted">Format</small><br>
+                            <i data-feather="message-circle" class="me-1"></i><strong>${formatDebateType(room.format)}</strong>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted">Skill Level</small><br>
+                            <i data-feather="trending-up" class="me-1"></i><strong>${room.skill_level.charAt(0).toUpperCase() + room.skill_level.slice(1)}</strong>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted">Room Code</small><br>
+                            <code class="bg-secondary px-2 py-1 rounded">${room.code}</code>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        ${isJoinable ? 
+                            `<button class="btn btn-primary" onclick="quickJoinRoom('${room.code}')">
+                                <i data-feather="log-in" class="me-2"></i>Join Room
+                            </button>` :
+                            `<button class="btn btn-secondary" disabled>
+                                <i data-feather="lock" class="me-2"></i>Room Full
+                            </button>`
+                        }
+                        <button class="btn btn-outline-info" onclick="showRoomQR('${room.code}')" id="share-btn-${room.code}">
+                            <i data-feather="share-2" class="me-2"></i>Share
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    // Re-initialize feather icons
+    feather.replace();
+}
+
+// Helper functions
+function getStatusColor(status) {
+    switch(status) {
+        case 'waiting': return 'success';
+        case 'in_progress': return 'primary';
+        case 'full': return 'warning';
+        default: return 'secondary';
+    }
+}
+
+function getStatusText(status) {
+    switch(status) {
+        case 'waiting': return 'Waiting for players';
+        case 'in_progress': return 'Debate in progress';
+        case 'full': return 'Room full';
+        default: return 'Unknown';
+    }
+}
+
+function formatDebateType(format) {
+    switch(format) {
+        case 'pro_con': return 'Pro vs Con';
+        case 'british_parliamentary': return 'British Parliamentary';
+        case 'oxford': return 'Oxford Style';
+        case 'fishbowl': return 'Fishbowl Discussion';
+        default: return format;
+    }
+}
+
+// Quick join room function
+function quickJoinRoom(roomCode) {
+    document.querySelector('input[name="room_code"]').value = roomCode;
+    document.querySelector('#joinRoomForm input[name="participant_name"]').focus();
+    document.querySelector('#joinRoomForm input[name="participant_name"]').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Show QR code for room
+async function showRoomQR(roomCode) {
+    const qrContainer = document.getElementById('qrCodeContainer');
+    const joinUrl = `${window.location.origin}/multi-user?join=${roomCode}`;
+    const shareBtn = document.getElementById(`share-btn-${roomCode}`);
+    
+    // Show loading state
+    if (shareBtn) {
+        shareBtn.innerHTML = '<i data-feather="loader" class="me-2 rotating"></i>Generating...';
+        shareBtn.disabled = true;
+    }
+    
+    qrContainer.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary mb-2" role="status">
+                <span class="visually-hidden">Generating QR code...</span>
+            </div>
+            <p class="small text-muted">Generating QR code...</p>
+        </div>
+    `;
+    
+    try {
+        // Use server-side QR code generation
+        const response = await fetch(`/api/rooms/${roomCode}/qr`);
+        const data = await response.json();
+        
+        if (data.success) {
+            qrContainer.innerHTML = `
+                <div class="text-center">
+                    <div class="mb-2">
+                        <img src="data:image/png;base64,${data.qr_code}" alt="QR Code" class="img-fluid" style="background: white; padding: 10px; border-radius: 8px; max-width: 200px;">
+                    </div>
+                    <p class="small text-muted mb-0">Scan to join room: <strong>${roomCode}</strong></p>
+                    <p class="small text-info">${joinUrl}</p>
+                    <button class="btn btn-sm btn-outline-primary mt-2" onclick="copyToClipboard('${joinUrl}')">
+                        <i data-feather="copy" class="me-1"></i>Copy Link
+                    </button>
+                </div>
+            `;
+            
+            showNotification(`QR code generated for room ${roomCode}`, 'success');
+        } else {
+            throw new Error(data.error || 'Server QR generation failed');
+        }
+        
+    } catch (error) {
+        console.error('Server QR generation failed, using fallback:', error);
+        
+        // Fallback: Use QR Server API (reliable external service)
+        const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(joinUrl)}&bgcolor=2d3748&color=ffffff&format=png&margin=10`;
+        
+        qrContainer.innerHTML = `
+            <div class="text-center">
+                <div class="mb-2">
+                    <img src="${qrImageUrl}" alt="QR Code" class="img-fluid" style="background: white; padding: 10px; border-radius: 8px; max-width: 200px;" 
+                         onload="this.style.display='block'" 
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div style="display: none;" class="text-center">
+                        <div class="bg-secondary p-4 rounded mb-2" style="font-family: monospace; word-break: break-all; font-size: 0.8em;">
+                            ${joinUrl}
+                        </div>
+                        <p class="small text-muted">Share this link to join the room</p>
+                    </div>
+                </div>
+                <p class="small text-muted mb-0">Scan to join room: <strong>${roomCode}</strong></p>
+                <p class="small text-info">${joinUrl}</p>
+                <button class="btn btn-sm btn-outline-primary mt-2" onclick="copyToClipboard('${joinUrl}')">
+                    <i data-feather="copy" class="me-1"></i>Copy Link
+                </button>
+            </div>
+        `;
+        
+        showNotification(`Share link ready for room ${roomCode}`, 'info');
+    } finally {
+        // Restore button state
+        if (shareBtn) {
+            shareBtn.innerHTML = '<i data-feather="share-2" class="me-2"></i>Share';
+            shareBtn.disabled = false;
+            feather.replace();
+        }
+    }
+}
+
+// Copy to clipboard function
+function copyToClipboard(text) {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => {
+            showNotification('Link copied to clipboard!', 'success');
+        }).catch(() => {
+            fallbackCopyToClipboard(text);
+        });
+    } else {
+        fallbackCopyToClipboard(text);
+    }
+}
+
+function fallbackCopyToClipboard(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+        document.execCommand('copy');
+        showNotification('Link copied to clipboard!', 'success');
+    } catch (err) {
+        showNotification('Failed to copy link. Please copy manually.', 'error');
+    }
+    
+    document.body.removeChild(textArea);
+}
+
+// Create room form handler
+document.getElementById('createRoomForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const roomData = {
+        room_name: formData.get('room_name'),
+        creator_name: formData.get('creator_name'),
+        format: formData.get('format'),
+        max_participants: parseInt(formData.get('max_participants')),
+        skill_level: formData.get('skill_level')
+    };
+    
+    try {
+        const response = await fetch('/api/rooms/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(roomData)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(`Room "${roomData.room_name}" created successfully! Room code: ${data.room.code}`, 'success');
+            
+            // Generate QR code for the new room
+            setTimeout(() => showRoomQR(data.room.code), 100);
+            
+            // Refresh the room list
+            loadActiveRooms();
+            
+            // Reset form
+            this.reset();
+            
+            // Store current room info
+            currentRoom = data.room;
+            
+        } else {
+            showNotification(data.error || 'Failed to create room', 'error');
+        }
+    } catch (error) {
+        console.error('Error creating room:', error);
+        showNotification('Failed to create room. Please try again.', 'error');
+    }
+});
+
+// Join room form handler
+document.getElementById('joinRoomForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const joinData = {
+        room_code: formData.get('room_code').toUpperCase(),
+        participant_name: formData.get('participant_name')
+    };
+    
+    try {
+        const response = await fetch('/api/rooms/join', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(joinData)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(`Successfully joined room ${joinData.room_code}!`, 'success');
+            
+            // Redirect to room interface (you can implement this)
+            enterRoom(data.room);
+            
+            // Reset form
+            this.reset();
+            
+        } else {
+            showNotification(data.error || 'Failed to join room', 'error');
+        }
+    } catch (error) {
+        console.error('Error joining room:', error);
+        showNotification('Failed to join room. Please try again.', 'error');
+    }
+});
+
+// Enter room function (placeholder for room interface)
+function enterRoom(room) {
+    currentRoom = room;
+    
+    // For now, show a detailed modal or redirect to room page
+    const roomDetails = `
+        <div class="modal fade show" style="display: block; background: rgba(0,0,0,0.5);">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content bg-dark text-light">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Room: ${room.name}</h5>
+                        <button type="button" class="btn-close btn-close-white" onclick="closeRoomModal()"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Room Information</h6>
+                                <p><strong>Code:</strong> ${room.code}</p>
+                                <p><strong>Format:</strong> ${formatDebateType(room.format)}</p>
+                                <p><strong>Participants:</strong> ${room.participants.length}/${room.max_participants}</p>
+                                <p><strong>Status:</strong> ${getStatusText(room.status)}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Participants</h6>
+                                ${room.participants.map(p => `
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i data-feather="user" class="me-2"></i>
+                                        <span>${p.name} ${p.role === 'host' ? '(Host)' : ''}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="text-center">
+                            <p class="text-info">Room interface with live chat, shared notes, timer, and debate tools would be implemented here.</p>
+                            <p>Features include:</p>
+                            <ul class="list-unstyled">
+                                <li>• Real-time chat and communication</li>
+                                <li>• Shared note-taking system</li>
+                                <li>• Debate timer and turn management</li>
+                                <li>• Motion setting and debate flow</li>
+                                <li>• Voice integration for speeches</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" onclick="startDebateInRoom()">
+                            <i data-feather="play" class="me-2"></i>Start Debate
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="closeRoomModal()">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', roomDetails);
+    feather.replace();
+}
+
+function closeRoomModal() {
+    const modal = document.querySelector('.modal.show');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+function startDebateInRoom() {
+    showNotification('Debate functionality would be integrated here with the existing debate system', 'info');
+    closeRoomModal();
+}
+
+// Notification function
+function showNotification(message, type = 'info') {
+    const alertClass = type === 'error' ? 'alert-danger' : 
+                      type === 'success' ? 'alert-success' : 
+                      type === 'warning' ? 'alert-warning' : 'alert-info';
+    
+    const notification = document.createElement('div');
+    notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 400px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', function() {
+    if (updateInterval) {
+        clearInterval(updateInterval);
+    }
+});
+</script>
+{% endblock %}
