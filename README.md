@@ -1,6 +1,6 @@
-# Argue Sage - AI-Powered Debate Learning Platform
+# Debate Sage - AI-Powered Debate Learning Platform
 
-Argue Sage is a comprehensive AI-powered educational web application designed to help users learn and practice debate skills. Built with Flask, the platform integrates with Google's Gemini AI to provide intelligent tutoring, debate simulation, and personalized feedback.
+Debate Sage is a comprehensive AI-powered educational web application designed to help users learn and practice debate skills. Built with Flask, the platform integrates with Google's Gemini AI to provide intelligent tutoring, debate simulation, and personalized feedback.
 
 ## 🎯 Features
 
@@ -86,7 +86,7 @@ Argue Sage is a comprehensive AI-powered educational web application designed to
 |----------|-------------|----------|
 | `GEMINI_API_KEY` | Google Gemini AI API key for AI features | Yes |
 | `SESSION_SECRET` | Secret key for Flask sessions | No (has default) |
-| `DATABASE_URL` | PostgreSQL database URL (if using database) | No |
+| `DATABASE_URL` | PostgreSQL database URL (if using database) | Yes |
 
 ### Getting a Gemini API Key
 
@@ -149,7 +149,7 @@ argue-sage/
 - **Flask Web Framework**: Handles routing and session management
 - **Gemini AI Service**: Provides intelligent tutoring and evaluation
 - **Debate Engine**: Manages lessons, progress, and achievements
-- **Session Storage**: Maintains user state without database dependency
+- **Database Storage**: Maintains user state without database dependency
 
 ### Frontend Technologies
 - **Bootstrap 5**: Responsive UI framework with dark theme
@@ -233,26 +233,20 @@ The application uses professional World Universities Debating Championship stand
 
 ## 📊 Data Storage
 
-### Session-Based Storage
+### Database-Based Storage
 - User profiles stored in Flask sessions
 - Debate history maintained per session
 - No database required for basic functionality
-- Scalable to database backend when needed
 
 ### Global Storage
 - Tournament data in server memory
 - Multi-user rooms in global state
 - Shared between all users
-- Resets on server restart
 
 ## 🔧 Troubleshooting
 
 ### Common Issues
 
-**Application won't start**
-- Check Python version (3.8+ required)
-- Verify all dependencies are installed
-- Ensure `.env` file exists with API key
 
 **AI features not working**
 - Verify `GEMINI_API_KEY` is correct
@@ -299,11 +293,9 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🆘 Support
 
-For support, please contact the development team or create an issue in the project repository.
+For support, please create an issue in the project repository.
 
 ## 🎉 Acknowledgments
 
-- Google Gemini AI for intelligent tutoring capabilities
-- Bootstrap team for the responsive UI framework
 - World Universities Debating Championship for evaluation standards
 - The debate education community for inspiration and feedback
