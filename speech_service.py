@@ -126,11 +126,7 @@ class SpeechService:
             
             # Convert to text
             google_lang_code = self.supported_languages.get(language, {}).get('tts_code', 'en')
-            try:
-                text = self.recognizer.recognize_google(audio, language=google_lang_code)
-            except AttributeError:
-                # Fallback if recognize_google is not available
-                text = self.recognizer.recognize_sphinx(audio)
+            text = self.recognizer.recognize_google(audio, language=google_lang_code)
             
             # Clean up temp files
             os.unlink(tmp_file_path)
@@ -249,7 +245,7 @@ class SpeechService:
             # Get available voices and try to set appropriate language voice
             try:
                 voices = engine.getProperty('voices')
-                if voices and len(voices) > 0:
+                if voices:
                     # Try to find a voice that matches the language
                     target_voice = None
                     lang_code = self.supported_languages.get(language, {}).get('tts_code', 'en')
@@ -269,9 +265,10 @@ class SpeechService:
                             continue
                     
                     # If no specific language voice found, use first available
-                    if not target_voice and len(voices) > 0:
+                    if not target_voice and voices:
                         try:
-                            target_voice = voices[0].id if hasattr(voices[0], 'id') else None
+                            first_voice = voices[0]
+                            target_voice = first_voice.id if hasattr(first_voice, 'id') else None
                         except (AttributeError, IndexError, TypeError):
                             target_voice = None
                     
