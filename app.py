@@ -2248,15 +2248,30 @@ def set_user_language():
     """Set user's preferred language"""
     init_session()
 
-    data = request.get_json()
-    language = data.get('language', 'en')
+    try:
+        data = request.get_json()
+        language = data.get('language', 'en')
 
-    if speech_service and language in speech_service.get_supported_languages():
-        session['user_profile']['preferred_language'] = language
-        session.modified = True
-        return jsonify({'success': True, 'language': language})
-    else:
-        return jsonify({'error': 'Language not supported'}), 400
+        # Check if speech service is available and language is supported
+        if speech_service:
+            supported_languages = speech_service.get_supported_languages()
+            if language in supported_languages:
+                session['user_profile']['preferred_language'] = language
+                session.modified = True
+                return jsonify({'success': True, 'language': language})
+            else:
+                logger.warning(f"Language '{language}' not supported. Supported: {list(supported_languages.keys())}")
+                return jsonify({'error': 'Language not supported'}), 400
+        else:
+            # If speech service is not available, still store the language preference
+            logger.warning("Speech service not available, storing language preference anyway")
+            session['user_profile']['preferred_language'] = language
+            session.modified = True
+            return jsonify({'success': True, 'language': language})
+            
+    except Exception as e:
+        logger.error(f"Error setting user language: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
 
 @app.route('/api/user/language', methods=['GET'])
 def get_user_language():
