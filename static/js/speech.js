@@ -69,7 +69,9 @@ class SpeechManager {
             } else {
                 // Default to English if no language preference is set
                 this.currentLanguage = 'en';
-                this.setLanguage('en');
+                if (data.language !== 'en') {
+                    await this.setLanguage('en');
+                }
             }
             this.updateLanguageSelectors();
         } catch (error) {
@@ -354,11 +356,25 @@ class SpeechManager {
             if (response.ok) {
                 this.currentLanguage = language;
                 this.updateLanguageSelectors();
-                this.showNotification(`Language set to ${this.supportedLanguages[language].name}`, 'success');
+                if (this.supportedLanguages[language]) {
+                    this.showNotification(`Language set to ${this.supportedLanguages[language].name}`, 'success');
+                } else {
+                    console.log(`Language set to ${language}`);
+                }
+            } else {
+                const errorData = await response.json().catch(() => ({}));
+                console.warn('Language setting failed:', errorData.error || 'Unknown error');
+                // Don't show error notification for unsupported languages during initialization
+                if (errorData.error !== 'Language not supported') {
+                    this.showNotification('Failed to set language', 'error');
+                }
             }
         } catch (error) {
             console.error('Failed to set language:', error);
-            this.showNotification('Failed to set language', 'error');
+            // Only show error notification if this isn't during initial page load
+            if (document.readyState === 'complete') {
+                this.showNotification('Failed to set language', 'error');
+            }
         }
     }
     
