@@ -40,7 +40,7 @@ Debate Sage is a comprehensive AI-powered educational web application designed t
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Python 3.8 or higher
+- Python 3.11 or higher
 - pip (Python package manager)
 - Google Gemini API key
 
@@ -122,6 +122,8 @@ argue-sage/
 ├── app_requirements.txt # Python dependencies
 └── README.md          # This file
 ```
+
+## 🚀 App Link : https://debate-sage.onrender.com/
 
 ## 🎮 Usage Guide
 
