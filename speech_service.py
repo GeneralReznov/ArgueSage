@@ -126,8 +126,11 @@ class SpeechService:
             
             # Convert to text
             google_lang_code = self.supported_languages.get(language, {}).get('tts_code', 'en')
-            text = self.recognizer.recognize_google(audio, language=google_lang_code)
-            
+            try:
+                text = self.recognizer.recognize_google(audio, language=google_lang_code)
+            except AttributeError:
+                # Fallback if recognize_google is not available
+                text = self.recognizer.recognize_sphinx(audio)
             # Clean up temp files
             os.unlink(tmp_file_path)
             if os.path.exists(wav_path):
