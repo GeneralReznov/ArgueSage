@@ -31,7 +31,7 @@ class LearningFeedback(BaseModel):
 
 class GeminiService:
     def __init__(self):
-        os.environ['GEMINI_API_KEY'] = "AIzaSyChpIrLMzJc42ETm0jS4KiKC_ra9Gv1_vE"
+        os.environ['GEMINI_API_KEY'] = "AIzaSyBov7MBSOeE5mLQw2TX7qAGVWyPMlltSQI"
         api_key = os.environ['GEMINI_API_KEY']
         if not api_key:
             raise ValueError("GEMINI_API_KEY environment variable is required")
