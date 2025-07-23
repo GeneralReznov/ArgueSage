@@ -1,8 +1,3 @@
-/**
- * Multi-lingual Speech Service Integration
- * Provides speech-to-text, text-to-speech, and translation capabilities
- */
-
 class SpeechManager {
     constructor() {
         this.isRecording = false;
