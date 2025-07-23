@@ -19,7 +19,7 @@ class SpeechService:
     """Multi-lingual speech service with Sarvam AI for STT and gTTS for TTS"""
     
     def __init__(self):
-        os.environ['GEMINI_API_KEY'] = "AIzaSyCZGGDVIyjebUyHX8m0xO6f1pBD6KKjErc"
+        os.environ['GEMINI_API_KEY'] = "AIzaSyChpIrLMzJc42ETm0jS4KiKC_ra9Gv1_vE"
         os.environ['SARVAM_API_KEY'] = "sk_wq9yiszy_Jewt6e5hC7N99X4khkVVNE7m"
         self.sarvam_api_key = os.environ['SARVAM_API_KEY']
         self.gemini_api_key = os.environ['GEMINI_API_KEY']
