@@ -125,6 +125,10 @@ argue-sage/
 
 ## 🚀 App Link : https://debate-sage.onrender.com/
 
+## 📝 Documentation : [B-Outlier Coders-Mokshit.pdf](https://github.com/user-attachments/files/21492875/B-Outlier.Coders-Mokshit.pdf)
+
+## 📈 Video Link : https://youtu.be/6Sw3iepVmPA
+
 ## 🎮 Usage Guide
 
 ### For Beginners
